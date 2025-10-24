@@ -131,11 +131,19 @@ class GitHubClient:
         only = only or []
 
         try:
+            # Get authenticated user to check if username matches
+            auth_user = self.github.get_user()
+
             if username:
-                user = self.github.get_user(username)
-                logger.info(f"Fetching repositories from user: {username}")
+                # Check if username is the authenticated user
+                if username.lower() == auth_user.login.lower():
+                    logger.info(f"Fetching repositories from authenticated user: {username} (using authenticated endpoint)")
+                    user = auth_user
+                else:
+                    logger.info(f"Fetching repositories from user: {username}")
+                    user = self.github.get_user(username)
             else:
-                user = self.github.get_user()
+                user = auth_user
                 logger.info(f"Fetching repositories from authenticated user: {user.login}")
 
             repos = []

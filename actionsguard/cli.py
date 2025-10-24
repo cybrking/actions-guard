@@ -988,18 +988,36 @@ def debug(user: Optional[str], token: Optional[str]):
         # Get user to check
         if user:
             console.print(f"[cyan]Fetching info for user:[/cyan] {user}")
-            target_user = client.github.get_user(user)
+
+            # Check if this is the authenticated user
+            is_self = user.lower() == auth_user.login.lower()
+            if is_self:
+                console.print(f"[yellow]  Note: You're querying your own account - using authenticated endpoint[/yellow]")
+                target_user = auth_user
+            else:
+                target_user = client.github.get_user(user)
         else:
             console.print(f"[cyan]Fetching your repositories...[/cyan]")
             target_user = auth_user
 
         console.print(f"  Login: {target_user.login}")
         console.print(f"  Public repos: {target_user.public_repos}")
+
+        # Get total repos if this is the authenticated user
+        if hasattr(target_user, 'total_private_repos'):
+            console.print(f"  Private repos: {target_user.total_private_repos}")
+            console.print(f"  Total owned repos: {target_user.owned_private_repos + target_user.public_repos}")
+
         console.print(f"  Type: {target_user.type}")
         console.print()
 
         # Get repositories
-        console.print("[cyan]Fetching repositories...[/cyan]")
+        console.print("[cyan]Fetching repositories via API...[/cyan]")
+
+        # For authenticated user, try different methods
+        if user and user.lower() == auth_user.login.lower():
+            console.print("[dim]  Using authenticated user endpoint[/dim]")
+
         repos_list = list(target_user.get_repos())
 
         console.print(f"\n[bold]Total repositories found: {len(repos_list)}[/bold]\n")
