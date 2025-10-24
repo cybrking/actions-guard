@@ -10,6 +10,7 @@ from github.Repository import Repository
 
 from actionsguard.github_client import GitHubClient
 from actionsguard.scorecard_runner import ScorecardRunner
+from actionsguard.workflow_analyzer import WorkflowAnalyzer
 from actionsguard.models import ScanResult, ScanSummary, RiskLevel
 from actionsguard.utils.config import Config
 
@@ -30,6 +31,7 @@ class Scanner:
         self.config = config
         self.github_client = GitHubClient(config.github_token)
         self.scorecard_runner = ScorecardRunner(timeout=config.scorecard_timeout)
+        self.workflow_analyzer = WorkflowAnalyzer()
 
     def scan_repository(self, repo: Repository) -> ScanResult:
         """
@@ -74,6 +76,11 @@ class Scanner:
             metadata = self.scorecard_runner.get_metadata(scorecard_data)
             metadata["has_workflows"] = True
 
+            # Analyze workflows for detailed findings
+            workflows = self.workflow_analyzer.analyze_scorecard_results(
+                scorecard_data, checks
+            )
+
             result = ScanResult(
                 repo_name=repo_name,
                 repo_url=repo_url,
@@ -81,6 +88,7 @@ class Scanner:
                 risk_level=ScanResult.calculate_risk_level(score),
                 scan_date=datetime.now(),
                 checks=checks,
+                workflows=workflows,
                 metadata=metadata,
             )
 
