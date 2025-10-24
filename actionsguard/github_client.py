@@ -105,6 +105,74 @@ class GitHubClient:
                 )
             raise
 
+    def get_user_repos(
+        self,
+        username: Optional[str] = None,
+        exclude: Optional[List[str]] = None,
+        only: Optional[List[str]] = None
+    ) -> List[Repository]:
+        """
+        Get repositories from a user account with filtering.
+
+        Args:
+            username: GitHub username (if None, uses authenticated user)
+            exclude: List of repo names to exclude
+            only: List of repo names to include (if set, only these repos)
+
+        Returns:
+            List of Repository objects
+
+        Raises:
+            ValueError: If user not found or no access
+        """
+        exclude = exclude or []
+        only = only or []
+
+        try:
+            if username:
+                user = self.github.get_user(username)
+                logger.info(f"Fetching repositories from user: {username}")
+            else:
+                user = self.github.get_user()
+                logger.info(f"Fetching repositories from authenticated user: {user.login}")
+
+            repos = []
+            for repo in self._paginate_with_retry(user.get_repos):
+                # Skip archived repos
+                if repo.archived:
+                    logger.debug(f"Skipping archived repo: {repo.name}")
+                    continue
+
+                # Skip forks unless explicitly included in 'only' list
+                if repo.fork and not (only and repo.name in only):
+                    logger.debug(f"Skipping forked repo: {repo.name}")
+                    continue
+
+                # Apply filtering
+                if only and repo.name not in only:
+                    continue
+
+                if repo.name in exclude:
+                    logger.debug(f"Excluding repo: {repo.name}")
+                    continue
+
+                repos.append(repo)
+
+            logger.info(f"Found {len(repos)} repositories to scan")
+            return repos
+
+        except GithubException as e:
+            if e.status == 404:
+                raise ValueError(
+                    f"User '{username}' not found. "
+                    "Check the username and ensure the account exists."
+                )
+            elif e.status == 403:
+                raise ValueError(
+                    f"No permission to access user '{username}' repositories."
+                )
+            raise
+
     def get_repository(self, repo_full_name: str) -> Repository:
         """
         Get a single repository by full name (owner/repo).

@@ -8,8 +8,9 @@
 
 ## Features
 
-- **🔍 Comprehensive Scanning**: Scan single repositories or entire organizations
+- **🔍 Comprehensive Scanning**: Scan single repositories, entire organizations, or user accounts
 - **📊 Multiple Report Formats**: JSON, HTML, CSV, and Markdown reports
+- **📦 Inventory Tracking**: Keep track of all your repos and their security scores over time
 - **🚀 Easy Integration**: Use as CLI tool or GitHub Action
 - **⚡ Parallel Execution**: Fast scanning with concurrent repository processing
 - **🎯 Focused Checks**: Run specific security checks or all OpenSSF Scorecard checks
@@ -133,10 +134,14 @@ export GITHUB_TOKEN="ghp_your_token_here"
 actionsguard scan --repo owner/repository
 ```
 
-### 3. Scan an Organization
+### 3. Scan an Organization or User Account
 
 ```bash
+# Scan an entire organization
 actionsguard scan --org your-organization
+
+# Scan a user account (e.g., your personal repos)
+actionsguard scan --user cybrking
 ```
 
 ## Usage
@@ -152,6 +157,9 @@ actionsguard scan --repo kubernetes/kubernetes
 # Scan entire organization
 actionsguard scan --org my-org
 
+# Scan a user account (personal repos)
+actionsguard scan --user cybrking
+
 # Scan with custom token
 actionsguard scan --repo owner/repo --token ghp_xxxxxxxxxxxx
 ```
@@ -161,9 +169,11 @@ actionsguard scan --repo owner/repo --token ghp_xxxxxxxxxxxx
 ```bash
 # Exclude specific repositories
 actionsguard scan --org my-org --exclude repo1,repo2
+actionsguard scan --user cybrking --exclude forked-repo
 
 # Only scan specific repositories
 actionsguard scan --org my-org --only important-repo,critical-repo
+actionsguard scan --user cybrking --only my-critical-project
 
 # Run specific security checks
 actionsguard scan --org my-org --checks Dangerous-Workflow,Token-Permissions

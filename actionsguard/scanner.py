@@ -229,6 +229,63 @@ class Scanner:
 
         return summary
 
+    def scan_user(
+        self,
+        username: Optional[str] = None,
+        exclude: Optional[List[str]] = None,
+        only: Optional[List[str]] = None,
+    ) -> ScanSummary:
+        """
+        Scan all repositories for a user account.
+
+        Args:
+            username: GitHub username (if None, uses authenticated user)
+            exclude: List of repo names to exclude
+            only: List of repo names to include (if set, only these repos)
+
+        Returns:
+            ScanSummary object
+        """
+        start_time = time.time()
+
+        # Get repositories
+        repos = self.github_client.get_user_repos(
+            username=username,
+            exclude=exclude,
+            only=only,
+        )
+
+        if not repos:
+            user_display = username if username else "authenticated user"
+            logger.warning(f"No repositories found for user: {user_display}")
+            return ScanSummary(
+                total_repos=0,
+                successful_scans=0,
+                failed_scans=0,
+                average_score=0.0,
+                critical_count=0,
+                high_count=0,
+                medium_count=0,
+                low_count=0,
+                results=[],
+                scan_duration=time.time() - start_time,
+            )
+
+        # Scan repositories
+        results = self.scan_repositories(repos, parallel=True)
+
+        # Create summary
+        duration = time.time() - start_time
+        summary = ScanSummary.from_results(results, scan_duration=duration)
+
+        user_display = username if username else "authenticated user"
+        logger.info(
+            f"User scan complete for {user_display}: {summary.successful_scans} successful, "
+            f"{summary.failed_scans} failed, avg score: {summary.average_score:.1f}"
+        )
+
+        return summary
+
     def scan_single_repository(self, repo_full_name: str) -> ScanResult:
         """
         Scan a single repository by name.

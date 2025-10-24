@@ -55,6 +55,11 @@ def cli(ctx, verbose):
     help="Scan all repositories in an organization"
 )
 @click.option(
+    "--user",
+    "-u",
+    help="Scan all repositories for a user account (or use --user without value for authenticated user)"
+)
+@click.option(
     "--exclude",
     help="Comma-separated list of repositories to exclude"
 )
@@ -107,6 +112,7 @@ def scan(
     ctx,
     repo: Optional[str],
     org: Optional[str],
+    user: Optional[str],
     exclude: Optional[str],
     only: Optional[str],
     output: str,
@@ -128,20 +134,25 @@ def scan(
       # Scan an entire organization
       actionsguard scan --org my-org
 
+      # Scan a user account (e.g., your personal repos)
+      actionsguard scan --user cybrking
+
       # Scan with filters
       actionsguard scan --org my-org --exclude repo1,repo2
+      actionsguard scan --user cybrking --only my-important-repo
 
       # Custom output and formats
       actionsguard scan --org my-org --output ./my-reports --format json,html
     """
     try:
         # Validate input
-        if not repo and not org:
-            console.print("[red]Error: Must specify either --repo or --org[/red]")
+        specified = sum([bool(repo), bool(org), bool(user)])
+        if specified == 0:
+            console.print("[red]Error: Must specify either --repo, --org, or --user[/red]")
             sys.exit(2)
 
-        if repo and org:
-            console.print("[red]Error: Cannot specify both --repo and --org[/red]")
+        if specified > 1:
+            console.print("[red]Error: Cannot specify multiple sources (--repo, --org, --user)[/red]")
             sys.exit(2)
 
         # Build configuration
@@ -182,7 +193,7 @@ def scan(
             result = scanner.scan_single_repository(repo)
             from actionsguard.models import ScanSummary
             summary = ScanSummary.from_results([result])
-        else:
+        elif org:
             exclude_list = exclude.split(",") if exclude else []
             only_list = only.split(",") if only else []
 
@@ -207,6 +218,37 @@ def scan(
 
                 summary = scanner.scan_organization(
                     org_name=org,
+                    exclude=exclude_list if exclude_list else None,
+                    only=only_list if only_list else None,
+                )
+
+                progress.update(task, completed=True)
+        else:  # user
+            exclude_list = exclude.split(",") if exclude else []
+            only_list = only.split(",") if only else []
+
+            user_display = user if user else "authenticated user"
+            console.print(f"[bold]Scanning user account:[/bold] {user_display}")
+            if exclude_list:
+                console.print(f"[dim]Excluding: {', '.join(exclude_list)}[/dim]")
+            if only_list:
+                console.print(f"[dim]Only scanning: {', '.join(only_list)}[/dim]")
+            console.print()
+
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                BarColumn(),
+                TaskProgressColumn(),
+                console=console,
+            ) as progress:
+                task = progress.add_task(
+                    "[cyan]Scanning repositories...",
+                    total=None
+                )
+
+                summary = scanner.scan_user(
+                    username=user,
                     exclude=exclude_list if exclude_list else None,
                     only=only_list if only_list else None,
                 )
@@ -395,8 +437,12 @@ def inventory():
 @click.option(
     "--org",
     "-o",
-    required=True,
     help="Organization name to scan and update inventory"
+)
+@click.option(
+    "--user",
+    "-u",
+    help="User account to scan and update inventory (use without value for authenticated user)"
 )
 @click.option(
     "--exclude",
@@ -412,25 +458,38 @@ def inventory():
     help="GitHub token (or set GITHUB_TOKEN env var)"
 )
 @click.pass_context
-def update(ctx, org, exclude, only, token):
+def update(ctx, org, user, exclude, only, token):
     """
-    Scan organization and update inventory.
+    Scan organization or user account and update inventory.
 
-    This scans all repositories in the organization and updates the
-    inventory database with current scores and status.
+    This scans all repositories and updates the inventory database
+    with current scores and status.
 
     Examples:
 
       # Update inventory for your organization
       actionsguard inventory update --org my-org
 
+      # Update inventory for a user account
+      actionsguard inventory update --user cybrking
+
       # Exclude certain repos
       actionsguard inventory update --org my-org --exclude archived-repo
 
       # Only scan specific repos
-      actionsguard inventory update --org my-org --only critical-app
+      actionsguard inventory update --user cybrking --only critical-app
     """
     try:
+        # Validate input
+        specified = sum([bool(org), bool(user)])
+        if specified == 0:
+            console.print("[red]Error: Must specify either --org or --user[/red]")
+            sys.exit(2)
+
+        if specified > 1:
+            console.print("[red]Error: Cannot specify both --org and --user[/red]")
+            sys.exit(2)
+
         console.print("\n[bold blue]📊 Updating Repository Inventory[/bold blue]\n")
 
         # Build config
@@ -447,17 +506,25 @@ def update(ctx, org, exclude, only, token):
         # Create scanner
         scanner = Scanner(config)
 
-        # Scan organization
-        console.print(f"[cyan]Scanning organization:[/cyan] {org}\n")
-
+        # Scan organization or user
         exclude_list = exclude.split(",") if exclude else None
         only_list = only.split(",") if only else None
 
-        summary = scanner.scan_organization(
-            org_name=org,
-            exclude=exclude_list,
-            only=only_list,
-        )
+        if org:
+            console.print(f"[cyan]Scanning organization:[/cyan] {org}\n")
+            summary = scanner.scan_organization(
+                org_name=org,
+                exclude=exclude_list,
+                only=only_list,
+            )
+        else:  # user
+            user_display = user if user else "authenticated user"
+            console.print(f"[cyan]Scanning user account:[/cyan] {user_display}\n")
+            summary = scanner.scan_user(
+                username=user,
+                exclude=exclude_list,
+                only=only_list,
+            )
 
         # Update inventory
         console.print("\n[cyan]Updating inventory...[/cyan]")

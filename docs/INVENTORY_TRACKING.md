@@ -9,8 +9,14 @@ The inventory system keeps a running database of all your repositories, their sc
 ```bash
 export GITHUB_TOKEN="your_token_here"
 
-# Scan your entire org and build inventory
+# Option A: Scan your entire organization
 actionsguard inventory update --org your-org-name
+
+# Option B: Scan your personal account
+actionsguard inventory update --user cybrking
+
+# Option C: Scan any user's public repos
+actionsguard inventory update --user username
 ```
 
 This scans all repos and saves to `.actionsguard/inventory.json`
@@ -43,6 +49,8 @@ open inventory-export/inventory.html
 ```bash
 # Run updates weekly (or however often you want)
 actionsguard inventory update --org your-org-name
+# or
+actionsguard inventory update --user cybrking
 
 # See what changed
 actionsguard inventory diff
