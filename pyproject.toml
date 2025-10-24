@@ -57,6 +57,9 @@ Repository = "https://github.com/your-username/actionsguard"
 [tool.setuptools.dynamic]
 version = {attr = "actionsguard.__version__.__version__"}
 
+[tool.setuptools.package-data]
+actionsguard = ["templates/*.html"]
+
 [tool.black]
 line-length = 100
 target-version = ["py38", "py39", "py310", "py311"]
