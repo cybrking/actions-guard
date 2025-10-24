@@ -9,11 +9,13 @@ from datetime import datetime
 
 import click
 from rich.console import Console
+from rich.table import Table
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
 
 from actionsguard.__version__ import __version__
 from actionsguard.scanner import Scanner
 from actionsguard.scorecard_runner import ScorecardRunner
+from actionsguard.inventory import Inventory
 from actionsguard.models import ScanResult, ScanSummary, RiskLevel
 from actionsguard.utils.config import Config
 from actionsguard.utils.logging import setup_logger
@@ -381,6 +383,425 @@ def import_scorecard(ctx, scorecard_json, output, formats, repo_name):
         if ctx.obj.get("verbose"):
             console.print_exception()
         sys.exit(2)
+
+
+@cli.group()
+def inventory():
+    """Manage repository inventory and tracking."""
+    pass
+
+
+@inventory.command()
+@click.option(
+    "--org",
+    "-o",
+    required=True,
+    help="Organization name to scan and update inventory"
+)
+@click.option(
+    "--exclude",
+    help="Comma-separated list of repositories to exclude"
+)
+@click.option(
+    "--only",
+    help="Comma-separated list of repositories to scan (all others excluded)"
+)
+@click.option(
+    "--token",
+    "-t",
+    help="GitHub token (or set GITHUB_TOKEN env var)"
+)
+@click.pass_context
+def update(ctx, org, exclude, only, token):
+    """
+    Scan organization and update inventory.
+
+    This scans all repositories in the organization and updates the
+    inventory database with current scores and status.
+
+    Examples:
+
+      # Update inventory for your organization
+      actionsguard inventory update --org my-org
+
+      # Exclude certain repos
+      actionsguard inventory update --org my-org --exclude archived-repo
+
+      # Only scan specific repos
+      actionsguard inventory update --org my-org --only critical-app
+    """
+    try:
+        console.print("\n[bold blue]📊 Updating Repository Inventory[/bold blue]\n")
+
+        # Build config
+        config_kwargs = {
+            "parallel_scans": 5,
+            "verbose": ctx.obj.get("verbose", False),
+        }
+        if token:
+            config_kwargs["github_token"] = token
+
+        config = Config(**config_kwargs)
+        config.validate()
+
+        # Create scanner
+        scanner = Scanner(config)
+
+        # Scan organization
+        console.print(f"[cyan]Scanning organization:[/cyan] {org}\n")
+
+        exclude_list = exclude.split(",") if exclude else None
+        only_list = only.split(",") if only else None
+
+        summary = scanner.scan_organization(
+            org_name=org,
+            exclude=exclude_list,
+            only=only_list,
+        )
+
+        # Update inventory
+        console.print("\n[cyan]Updating inventory...[/cyan]")
+        inv = Inventory()
+        changes = inv.update_from_scan(summary.results)
+
+        # Display changes
+        new_count = sum(1 for c in changes.values() if c == "new")
+        updated_count = sum(1 for c in changes.values() if c == "updated")
+        unchanged_count = sum(1 for c in changes.values() if c == "unchanged")
+
+        console.print(f"\n[green]✅ Inventory updated![/green]\n")
+        console.print(f"  🆕 New repositories:     {new_count}")
+        console.print(f"  📝 Updated repositories: {updated_count}")
+        console.print(f"  ✓  Unchanged:            {unchanged_count}")
+
+        # Show score changes
+        score_changes = inv.get_score_changes()
+        if score_changes:
+            console.print(f"\n[bold]Recent Score Changes:[/bold]\n")
+            for change in score_changes[:5]:  # Show top 5
+                emoji = "📈" if change["change"] > 0 else "📉"
+                console.print(
+                    f"  {emoji} {change['repo_name']}: "
+                    f"{change['previous_score']:.1f} → {change['current_score']:.1f} "
+                    f"({change['change']:+.1f})"
+                )
+
+        console.print(f"\n[dim]Inventory stored in: .actionsguard/inventory.json[/dim]\n")
+
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        if ctx.obj.get("verbose"):
+            console.print_exception()
+        sys.exit(2)
+
+
+@inventory.command()
+@click.option(
+    "--sort",
+    type=click.Choice(["score", "risk", "name", "updated"]),
+    default="risk",
+    help="Sort by field (default: risk)"
+)
+@click.option(
+    "--filter-risk",
+    type=click.Choice(["CRITICAL", "HIGH", "MEDIUM", "LOW"]),
+    help="Show only repos with specific risk level"
+)
+def list(sort, filter_risk):
+    """
+    List all repositories in inventory.
+
+    Shows current score, risk level, and last update time for all
+    repositories being tracked.
+
+    Examples:
+
+      # List all repos
+      actionsguard inventory list
+
+      # Show only critical risk repos
+      actionsguard inventory list --filter-risk CRITICAL
+
+      # Sort by score (lowest first)
+      actionsguard inventory list --sort score
+    """
+    inv = Inventory()
+    entries = inv.get_all()
+
+    if not entries:
+        console.print("[yellow]Inventory is empty. Run 'actionsguard inventory update' first.[/yellow]")
+        return
+
+    # Filter
+    if filter_risk:
+        entries = [e for e in entries if e.current_risk == filter_risk]
+
+    # Sort
+    if sort == "score":
+        entries.sort(key=lambda e: e.current_score)
+    elif sort == "risk":
+        risk_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
+        entries.sort(key=lambda e: risk_order.get(e.current_risk, 4))
+    elif sort == "name":
+        entries.sort(key=lambda e: e.repo_name)
+    elif sort == "updated":
+        entries.sort(key=lambda e: e.last_updated, reverse=True)
+
+    # Create table
+    table = Table(title="Repository Inventory", show_header=True, header_style="bold magenta")
+    table.add_column("Repository", style="cyan")
+    table.add_column("Score", justify="right")
+    table.add_column("Risk", justify="center")
+    table.add_column("Scans", justify="right")
+    table.add_column("Last Updated", style="dim")
+
+    # Add rows
+    risk_colors = {
+        "CRITICAL": "red",
+        "HIGH": "orange1",
+        "MEDIUM": "yellow",
+        "LOW": "green",
+    }
+
+    for entry in entries:
+        risk_color = risk_colors.get(entry.current_risk, "white")
+        table.add_row(
+            entry.repo_name,
+            f"{entry.current_score:.1f}/10",
+            f"[{risk_color}]{entry.current_risk}[/{risk_color}]",
+            str(entry.scan_count),
+            entry.last_updated[:10],  # Just the date
+        )
+
+    console.print()
+    console.print(table)
+
+    # Summary stats
+    stats = inv.get_summary_stats()
+    console.print(f"\n[bold]Summary:[/bold]")
+    console.print(f"  Total: {stats['total_repos']} repos")
+    console.print(f"  Average Score: {stats['avg_score']:.1f}/10")
+    console.print(f"  🔴 Critical: {stats['risk_breakdown']['CRITICAL']}")
+    console.print(f"  🟠 High: {stats['risk_breakdown']['HIGH']}")
+    console.print(f"  🟡 Medium: {stats['risk_breakdown']['MEDIUM']}")
+    console.print(f"  🟢 Low: {stats['risk_breakdown']['LOW']}\n")
+
+
+@inventory.command()
+@click.option(
+    "--output",
+    "-o",
+    default="./inventory-export",
+    help="Output directory for export (default: ./inventory-export)"
+)
+@click.option(
+    "--format",
+    "-f",
+    "formats",
+    default="html,csv,json",
+    help="Export formats (comma-separated: json,html,csv)"
+)
+def export(output, formats):
+    """
+    Export inventory to various formats.
+
+    Generates comprehensive reports of your entire repository inventory
+    including historical trends and current status.
+
+    Examples:
+
+      # Export to all formats
+      actionsguard inventory export
+
+      # Export only CSV
+      actionsguard inventory export --format csv
+
+      # Custom output directory
+      actionsguard inventory export --output ./reports/inventory
+    """
+    inv = Inventory()
+    entries = inv.get_all()
+
+    if not entries:
+        console.print("[yellow]Inventory is empty. Run 'actionsguard inventory update' first.[/yellow]")
+        return
+
+    output_dir = Path(output)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    console.print(f"\n[bold]Exporting inventory...[/bold]\n")
+
+    format_list = [f.strip().lower() for f in formats.split(",")]
+
+    # Export JSON
+    if "json" in format_list:
+        json_path = output_dir / "inventory.json"
+        with open(json_path, 'w') as f:
+            json.dump(inv.export_to_dict(), f, indent=2)
+        console.print(f"  ✓ JSON: {json_path}")
+
+    # Export CSV
+    if "csv" in format_list:
+        import csv
+        csv_path = output_dir / "inventory.csv"
+        with open(csv_path, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                "Repository", "URL", "Current Score", "Risk Level",
+                "First Seen", "Last Updated", "Scan Count"
+            ])
+            for entry in entries:
+                writer.writerow([
+                    entry.repo_name,
+                    entry.repo_url,
+                    f"{entry.current_score:.1f}",
+                    entry.current_risk,
+                    entry.first_seen[:10],
+                    entry.last_updated[:10],
+                    entry.scan_count,
+                ])
+        console.print(f"  ✓ CSV: {csv_path}")
+
+    # Export HTML (simple dashboard)
+    if "html" in format_list:
+        html_path = output_dir / "inventory.html"
+        _generate_inventory_html(inv, html_path)
+        console.print(f"  ✓ HTML: {html_path}")
+
+    console.print(f"\n[green]✅ Inventory exported to: {output_dir}[/green]\n")
+
+
+@inventory.command()
+def diff():
+    """
+    Show changes since last scan.
+
+    Displays repositories with score changes, highlighting improvements
+    and regressions.
+    """
+    inv = Inventory()
+    changes = inv.get_score_changes()
+
+    if not changes:
+        console.print("[yellow]No score changes found. All repositories are stable.[/yellow]")
+        return
+
+    console.print("\n[bold]📊 Score Changes Since Last Scan[/bold]\n")
+
+    # Separate improvements and regressions
+    improved = [c for c in changes if c["change"] > 0]
+    regressed = [c for c in changes if c["change"] < 0]
+
+    if improved:
+        console.print("[green]📈 Improved:[/green]")
+        for change in improved:
+            console.print(
+                f"  {change['repo_name']}: "
+                f"{change['previous_score']:.1f} → {change['current_score']:.1f} "
+                f"[green](+{change['change']:.1f})[/green]"
+            )
+        console.print()
+
+    if regressed:
+        console.print("[red]📉 Regressed:[/red]")
+        for change in regressed:
+            console.print(
+                f"  {change['repo_name']}: "
+                f"{change['previous_score']:.1f} → {change['current_score']:.1f} "
+                f"[red]({change['change']:.1f})[/red]"
+            )
+        console.print()
+
+
+def _generate_inventory_html(inv: Inventory, output_path: Path):
+    """Generate simple HTML dashboard for inventory."""
+    stats = inv.get_summary_stats()
+    entries = inv.get_all()
+
+    # Sort by risk
+    risk_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
+    entries.sort(key=lambda e: risk_order.get(e.current_risk, 4))
+
+    html = f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>Repository Inventory</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }}
+        .container {{ max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; }}
+        h1 {{ color: #2c3e50; }}
+        .stats {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin: 20px 0; }}
+        .stat-card {{ background: #f8f9fa; padding: 20px; border-radius: 6px; text-align: center; }}
+        .stat-value {{ font-size: 2em; font-weight: bold; color: #2c3e50; }}
+        .stat-label {{ color: #7f8c8d; text-transform: uppercase; font-size: 0.9em; }}
+        table {{ width: 100%; border-collapse: collapse; margin-top: 20px; }}
+        th {{ background: #3498db; color: white; padding: 12px; text-align: left; }}
+        td {{ padding: 10px; border-bottom: 1px solid #ddd; }}
+        tr:hover {{ background: #f8f9fa; }}
+        .risk-critical {{ background: #e74c3c; color: white; padding: 5px 10px; border-radius: 4px; }}
+        .risk-high {{ background: #f39c12; color: white; padding: 5px 10px; border-radius: 4px; }}
+        .risk-medium {{ background: #f1c40f; color: #333; padding: 5px 10px; border-radius: 4px; }}
+        .risk-low {{ background: #27ae60; color: white; padding: 5px 10px; border-radius: 4px; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ Repository Inventory Dashboard</h1>
+        <p>Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value">{stats['total_repos']}</div>
+                <div class="stat-label">Total Repos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{stats['avg_score']:.1f}</div>
+                <div class="stat-label">Avg Score</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{stats['risk_breakdown']['CRITICAL']}</div>
+                <div class="stat-label">Critical</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{stats['risk_breakdown']['HIGH']}</div>
+                <div class="stat-label">High Risk</div>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Repository</th>
+                    <th>Score</th>
+                    <th>Risk Level</th>
+                    <th>Scans</th>
+                    <th>Last Updated</th>
+                </tr>
+            </thead>
+            <tbody>
+"""
+
+    for entry in entries:
+        html += f"""
+                <tr>
+                    <td><a href="{entry.repo_url}" target="_blank">{entry.repo_name}</a></td>
+                    <td>{entry.current_score:.1f}/10</td>
+                    <td><span class="risk-{entry.current_risk.lower()}">{entry.current_risk}</span></td>
+                    <td>{entry.scan_count}</td>
+                    <td>{entry.last_updated[:10]}</td>
+                </tr>
+"""
+
+    html += """
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+"""
+
+    with open(output_path, 'w') as f:
+        f.write(html)
 
 
 if __name__ == "__main__":
