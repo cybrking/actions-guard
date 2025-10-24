@@ -286,13 +286,21 @@ scorecard version
 
 ### Issue: "GitHub token not found"
 
+This is the most common issue!
+
+**Quick fix:**
 ```bash
 # Verify token is set
 echo $GITHUB_TOKEN
 
 # If empty, export it again
 export GITHUB_TOKEN="your-token-here"
+
+# If still not working, use the --token flag
+actionsguard scan --repo owner/repo --token "your-token-here"
 ```
+
+**Detailed troubleshooting:** See [TROUBLESHOOTING_TOKEN.md](docs/TROUBLESHOOTING_TOKEN.md) for comprehensive debugging steps.
 
 ### Issue: "Rate limit exceeded"
 

@@ -31,7 +31,10 @@ class Config:
         if not self.github_token:
             raise ValueError(
                 "GitHub token not found. Set GITHUB_TOKEN environment variable "
-                "or use --token flag."
+                "or use --token flag.\n\n"
+                "💡 Quick fix:\n"
+                "   export GITHUB_TOKEN='your_token_here'\n\n"
+                "🔍 Debug: Run 'echo $GITHUB_TOKEN' to check if token is set"
             )
 
     @property

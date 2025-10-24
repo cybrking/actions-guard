@@ -378,6 +378,10 @@ stage('Security Scan') {
 
 ## Troubleshooting
 
+For detailed troubleshooting guides, see:
+- **Token Issues**: [docs/TROUBLESHOOTING_TOKEN.md](docs/TROUBLESHOOTING_TOKEN.md)
+- **General Guide**: [docs/TOKEN_GUIDE.md](docs/TOKEN_GUIDE.md)
+
 ### Common Issues
 
 **1. Scorecard Installation Error**

@@ -139,15 +139,21 @@ def scan(
             sys.exit(2)
 
         # Build configuration
-        config = Config(
-            github_token=token,
-            output_dir=output,
-            formats=formats.split(","),
-            checks=checks.split(",") if checks else Config().checks,
-            fail_on_critical=fail_on_critical,
-            verbose=ctx.obj["verbose"],
-            parallel_scans=parallel,
-        )
+        # Only pass github_token if explicitly provided via --token flag
+        # Otherwise, Config will read from GITHUB_TOKEN env var
+        config_kwargs = {
+            "output_dir": output,
+            "formats": formats.split(","),
+            "checks": checks.split(",") if checks else Config().checks,
+            "fail_on_critical": fail_on_critical,
+            "verbose": ctx.obj["verbose"],
+            "parallel_scans": parallel,
+        }
+
+        if token:
+            config_kwargs["github_token"] = token
+
+        config = Config(**config_kwargs)
 
         if all_checks:
             config.checks = ["all"]
