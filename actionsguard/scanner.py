@@ -234,6 +234,7 @@ class Scanner:
         username: Optional[str] = None,
         exclude: Optional[List[str]] = None,
         only: Optional[List[str]] = None,
+        include_forks: bool = False,
     ) -> ScanSummary:
         """
         Scan all repositories for a user account.
@@ -242,6 +243,7 @@ class Scanner:
             username: GitHub username (if None, uses authenticated user)
             exclude: List of repo names to exclude
             only: List of repo names to include (if set, only these repos)
+            include_forks: Whether to include forked repositories (default: False)
 
         Returns:
             ScanSummary object
@@ -253,6 +255,7 @@ class Scanner:
             username=username,
             exclude=exclude,
             only=only,
+            include_forks=include_forks,
         )
 
         if not repos:

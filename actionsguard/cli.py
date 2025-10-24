@@ -107,6 +107,11 @@ def cli(ctx, verbose):
     type=int,
     help="Number of parallel scans (default: 5)"
 )
+@click.option(
+    "--include-forks",
+    is_flag=True,
+    help="Include forked repositories when scanning user accounts (default: exclude forks)"
+)
 @click.pass_context
 def scan(
     ctx,
@@ -121,7 +126,8 @@ def scan(
     all_checks: bool,
     fail_on_critical: bool,
     token: Optional[str],
-    parallel: int
+    parallel: int,
+    include_forks: bool
 ):
     """
     Scan GitHub Actions workflows for security issues.
@@ -251,6 +257,7 @@ def scan(
                     username=user,
                     exclude=exclude_list if exclude_list else None,
                     only=only_list if only_list else None,
+                    include_forks=include_forks,
                 )
 
                 progress.update(task, completed=True)
@@ -457,8 +464,13 @@ def inventory():
     "-t",
     help="GitHub token (or set GITHUB_TOKEN env var)"
 )
+@click.option(
+    "--include-forks",
+    is_flag=True,
+    help="Include forked repositories when scanning user accounts (default: exclude forks)"
+)
 @click.pass_context
-def update(ctx, org, user, exclude, only, token):
+def update(ctx, org, user, exclude, only, token, include_forks):
     """
     Scan organization or user account and update inventory.
 
@@ -524,6 +536,7 @@ def update(ctx, org, user, exclude, only, token):
                 username=user,
                 exclude=exclude_list,
                 only=only_list,
+                include_forks=include_forks,
             )
 
         # Update inventory

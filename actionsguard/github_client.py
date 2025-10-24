@@ -109,7 +109,8 @@ class GitHubClient:
         self,
         username: Optional[str] = None,
         exclude: Optional[List[str]] = None,
-        only: Optional[List[str]] = None
+        only: Optional[List[str]] = None,
+        include_forks: bool = False
     ) -> List[Repository]:
         """
         Get repositories from a user account with filtering.
@@ -118,6 +119,7 @@ class GitHubClient:
             username: GitHub username (if None, uses authenticated user)
             exclude: List of repo names to exclude
             only: List of repo names to include (if set, only these repos)
+            include_forks: Whether to include forked repositories (default: False)
 
         Returns:
             List of Repository objects
@@ -137,28 +139,43 @@ class GitHubClient:
                 logger.info(f"Fetching repositories from authenticated user: {user.login}")
 
             repos = []
+            total_repos = 0
+            skipped_archived = 0
+            skipped_forks = 0
+            skipped_filtered = 0
+
             for repo in self._paginate_with_retry(user.get_repos):
+                total_repos += 1
+
                 # Skip archived repos
                 if repo.archived:
+                    skipped_archived += 1
                     logger.debug(f"Skipping archived repo: {repo.name}")
                     continue
 
-                # Skip forks unless explicitly included in 'only' list
-                if repo.fork and not (only and repo.name in only):
+                # Skip forks unless explicitly included in 'only' list or include_forks is True
+                if repo.fork and not include_forks and not (only and repo.name in only):
+                    skipped_forks += 1
                     logger.debug(f"Skipping forked repo: {repo.name}")
                     continue
 
                 # Apply filtering
                 if only and repo.name not in only:
+                    skipped_filtered += 1
                     continue
 
                 if repo.name in exclude:
+                    skipped_filtered += 1
                     logger.debug(f"Excluding repo: {repo.name}")
                     continue
 
                 repos.append(repo)
 
-            logger.info(f"Found {len(repos)} repositories to scan")
+            logger.info(
+                f"Found {len(repos)} repositories to scan "
+                f"(total: {total_repos}, archived: {skipped_archived}, "
+                f"forks: {skipped_forks}, filtered: {skipped_filtered})"
+            )
             return repos
 
         except GithubException as e:
