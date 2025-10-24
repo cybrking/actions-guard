@@ -36,6 +36,68 @@ class RiskLevel(str, Enum):
 
 
 @dataclass
+class WorkflowFinding:
+    """A specific security finding in a workflow file."""
+
+    workflow_path: str  # e.g., ".github/workflows/ci.yml"
+    check_name: str  # e.g., "Dangerous-Workflow"
+    severity: Severity
+    message: str  # Description of the issue
+    line_number: Optional[int] = None
+    snippet: Optional[str] = None  # Code snippet showing the issue
+    recommendation: Optional[str] = None  # How to fix it
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary."""
+        return {
+            "workflow_path": self.workflow_path,
+            "check_name": self.check_name,
+            "severity": self.severity.value,
+            "message": self.message,
+            "line_number": self.line_number,
+            "snippet": self.snippet,
+            "recommendation": self.recommendation,
+        }
+
+
+@dataclass
+class WorkflowAnalysis:
+    """Security analysis for a single workflow file."""
+
+    path: str  # e.g., ".github/workflows/ci.yml"
+    findings: List[WorkflowFinding] = field(default_factory=list)
+    score: Optional[float] = None  # Individual workflow score if calculable
+
+    def get_critical_count(self) -> int:
+        """Count critical severity findings."""
+        return sum(1 for f in self.findings if f.severity == Severity.CRITICAL)
+
+    def get_high_count(self) -> int:
+        """Count high severity findings."""
+        return sum(1 for f in self.findings if f.severity == Severity.HIGH)
+
+    def get_medium_count(self) -> int:
+        """Count medium severity findings."""
+        return sum(1 for f in self.findings if f.severity == Severity.MEDIUM)
+
+    def get_low_count(self) -> int:
+        """Count low severity findings."""
+        return sum(1 for f in self.findings if f.severity == Severity.LOW)
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary."""
+        return {
+            "path": self.path,
+            "findings": [f.to_dict() for f in self.findings],
+            "score": self.score,
+            "critical_count": self.get_critical_count(),
+            "high_count": self.get_high_count(),
+            "medium_count": self.get_medium_count(),
+            "low_count": self.get_low_count(),
+        }
+
+
+@dataclass
 class CheckResult:
     """Result for a single security check."""
 
@@ -87,6 +149,7 @@ class ScanResult:
     risk_level: RiskLevel
     scan_date: datetime
     checks: List[CheckResult] = field(default_factory=list)
+    workflows: List[WorkflowAnalysis] = field(default_factory=list)  # NEW: Per-workflow findings
     metadata: Dict[str, Any] = field(default_factory=dict)
     error: Optional[str] = None
 
@@ -99,6 +162,7 @@ class ScanResult:
             "risk_level": self.risk_level.value,
             "scan_date": self.scan_date.isoformat(),
             "checks": [check.to_dict() for check in self.checks],
+            "workflows": [workflow.to_dict() for workflow in self.workflows],
             "metadata": self.metadata,
             "error": self.error,
         }
