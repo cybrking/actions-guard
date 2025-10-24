@@ -884,5 +884,149 @@ def _generate_inventory_html(inv: Inventory, output_path: Path):
         f.write(html)
 
 
+@cli.command()
+@click.option(
+    "--user",
+    "-u",
+    help="GitHub username to check (default: authenticated user)"
+)
+@click.option(
+    "--token",
+    "-t",
+    help="GitHub token (or set GITHUB_TOKEN env var)"
+)
+def debug(user: Optional[str], token: Optional[str]):
+    """
+    Debug GitHub API access and check what repositories are visible.
+
+    This command helps diagnose issues with token permissions and
+    repository visibility.
+
+    Examples:
+
+      # Check your own repos
+      actionsguard debug
+
+      # Check another user's repos
+      actionsguard debug --user cybrking
+    """
+    try:
+        console.print("\n[bold blue]🔍 ActionsGuard Debug Tool[/bold blue]\n")
+
+        # Build config
+        config_kwargs = {}
+        if token:
+            config_kwargs["github_token"] = token
+
+        config = Config(**config_kwargs)
+
+        # Check if token is set
+        if not config.github_token:
+            console.print("[red]❌ No GitHub token found![/red]")
+            console.print("\n[yellow]Please set GITHUB_TOKEN environment variable or use --token flag[/yellow]\n")
+            sys.exit(1)
+
+        console.print("[green]✓ GitHub token found[/green]\n")
+
+        # Test GitHub API
+        from actionsguard.github_client import GitHubClient
+
+        console.print("[cyan]Testing GitHub API connection...[/cyan]")
+        client = GitHubClient(config.github_token)
+
+        # Get authenticated user
+        auth_user = client.github.get_user()
+        console.print(f"[green]✓ Authenticated as:[/green] {auth_user.login}")
+        console.print(f"  Name: {auth_user.name or 'N/A'}")
+        console.print(f"  Type: {auth_user.type}")
+        console.print()
+
+        # Get user to check
+        if user:
+            console.print(f"[cyan]Fetching info for user:[/cyan] {user}")
+            target_user = client.github.get_user(user)
+        else:
+            console.print(f"[cyan]Fetching your repositories...[/cyan]")
+            target_user = auth_user
+
+        console.print(f"  Login: {target_user.login}")
+        console.print(f"  Public repos: {target_user.public_repos}")
+        console.print(f"  Type: {target_user.type}")
+        console.print()
+
+        # Get repositories
+        console.print("[cyan]Fetching repositories...[/cyan]")
+        repos_list = list(target_user.get_repos())
+
+        console.print(f"\n[bold]Total repositories found: {len(repos_list)}[/bold]\n")
+
+        if not repos_list:
+            console.print("[yellow]No repositories found![/yellow]\n")
+            console.print("Possible reasons:")
+            console.print("  • User has no public repositories")
+            console.print("  • Token doesn't have permission to see private repos")
+            console.print("  • User account doesn't exist or is private")
+            console.print()
+            return
+
+        # Categorize repos
+        owned_repos = [r for r in repos_list if not r.fork]
+        forked_repos = [r for r in repos_list if r.fork]
+        archived_repos = [r for r in repos_list if r.archived]
+        with_workflows = []
+
+        console.print(f"  📦 Owned repositories: {len(owned_repos)}")
+        console.print(f"  🍴 Forked repositories: {len(forked_repos)}")
+        console.print(f"  📁 Archived repositories: {len(archived_repos)}")
+        console.print()
+
+        # Show first 10 repos
+        console.print("[bold]First 10 repositories:[/bold]\n")
+
+        table = Table(show_header=True, header_style="bold cyan")
+        table.add_column("Repository")
+        table.add_column("Fork?")
+        table.add_column("Archived?")
+        table.add_column("Private?")
+
+        for repo in repos_list[:10]:
+            table.add_row(
+                repo.name,
+                "Yes" if repo.fork else "No",
+                "Yes" if repo.archived else "No",
+                "Yes" if repo.private else "No"
+            )
+
+        console.print(table)
+        console.print()
+
+        # Scanning recommendations
+        console.print("[bold]Scanning recommendations:[/bold]\n")
+
+        if len(owned_repos) > 0:
+            console.print(f"[green]✓ You have {len(owned_repos)} owned repos to scan[/green]")
+            user_arg = f" --user {user}" if user else ""
+            console.print(f"  Run: actionsguard scan{user_arg}")
+
+        if len(forked_repos) > 0:
+            console.print(f"[yellow]• You have {len(forked_repos)} forked repos (excluded by default)[/yellow]")
+            user_arg = f" --user {user}" if user else ""
+            console.print(f"  To include forks: actionsguard scan{user_arg} --include-forks")
+
+        if len(archived_repos) > 0:
+            console.print(f"[dim]• {len(archived_repos)} archived repos (always excluded)[/dim]")
+
+        console.print()
+
+    except ValueError as e:
+        console.print(f"[red]Error: {e}[/red]")
+        sys.exit(1)
+    except Exception as e:
+        console.print(f"[red]Unexpected error: {e}[/red]")
+        import traceback
+        console.print(traceback.format_exc())
+        sys.exit(1)
+
+
 if __name__ == "__main__":
     cli(obj={})
