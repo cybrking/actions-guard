@@ -128,6 +128,22 @@ Create at: https://github.com/settings/tokens/new
 export GITHUB_TOKEN="ghp_your_token_here"
 ```
 
+**⚠️ Important for Private Repositories:**
+
+If you're scanning your own private repos, you MUST use `repo` scope (not just `public_repo`). If you see "0 repositories found", your token likely doesn't have the right permissions.
+
+**Quick test:**
+```bash
+# Check if your token can see your repos
+actionsguard debug --user your-username
+```
+
+The debug command will:
+- Show which user you're authenticated as
+- Display your token scopes
+- List all repositories your token can see
+- Explain why repos might be filtered out
+
 ### 2. Scan a Repository
 
 ```bash

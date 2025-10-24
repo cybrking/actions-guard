@@ -10,6 +10,29 @@ ActionsGuard uses the GitHub API to:
 - List repositories in organizations
 - Access repository metadata
 
+## ⚠️ Important: Private vs Public Repositories
+
+**If you're scanning private repositories, you MUST have the correct token permissions:**
+
+| Repository Type | Required Permission (Classic) | Required Permission (Fine-grained) |
+|----------------|-------------------------------|-----------------------------------|
+| **Private repos** | `repo` scope | Contents: Read + Metadata: Read |
+| **Public repos only** | `public_repo` scope | Public Repositories (read-only) |
+
+**Common Issue:** If you see "0 repositories found" when scanning your own account, your token likely only has `public_repo` scope but your repos are private. Solution: Create a new token with `repo` scope.
+
+**Quick Fix for Private Repos:**
+```bash
+# 1. Create a new classic token at: https://github.com/settings/tokens/new
+# 2. Check the 'repo' box (full control of private repositories)
+# 3. Generate and copy the token
+# 4. Set it:
+export GITHUB_TOKEN='ghp_your_new_token_here'
+
+# 5. Test it:
+actionsguard debug --user your-username
+```
+
 ## Token Types
 
 ### Fine-grained Personal Access Tokens (Recommended) ⭐
