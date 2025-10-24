@@ -575,7 +575,7 @@ def update(ctx, org, user, exclude, only, token, include_forks):
         sys.exit(2)
 
 
-@inventory.command()
+@inventory.command(name="list")
 @click.option(
     "--sort",
     type=click.Choice(["score", "risk", "name", "updated"]),
@@ -587,7 +587,7 @@ def update(ctx, org, user, exclude, only, token, include_forks):
     type=click.Choice(["CRITICAL", "HIGH", "MEDIUM", "LOW"]),
     help="Show only repos with specific risk level"
 )
-def list(sort, filter_risk):
+def list_inventory(sort, filter_risk):
     """
     List all repositories in inventory.
 
