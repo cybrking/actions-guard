@@ -29,10 +29,20 @@ class WorkflowAnalyzer:
         Returns:
             List of WorkflowAnalysis objects, one per workflow file
         """
+        # Validate inputs
+        if not scorecard_data or not checks:
+            logger.debug("No scorecard data or checks to analyze")
+            return []
+
         workflow_findings_map = {}  # Map workflow path -> list of findings
 
         # Parse each check's details for workflow-specific information
-        for check_data in scorecard_data.get("checks", []):
+        checks_data = scorecard_data.get("checks", [])
+        if not checks_data:
+            logger.debug("No checks in scorecard data")
+            return []
+
+        for check_data in checks_data:
             check_name = check_data.get("name", "Unknown")
             check_score = check_data.get("score", 0)
 
@@ -46,9 +56,21 @@ class WorkflowAnalyzer:
                 continue
 
             # Extract details which contain file-specific information
-            details = check_data.get("details", [])
+            details = check_data.get("details")
+
+            # Skip if no details or details is None
+            if not details:
+                continue
+
+            # Ensure details is iterable
+            if not isinstance(details, (list, tuple)):
+                logger.warning(f"Details for {check_name} is not iterable: {type(details)}")
+                continue
 
             for detail in details:
+                if not detail or not isinstance(detail, dict):
+                    continue
+
                 # Scorecard details contain file paths and messages
                 msg = detail.get("msg", "")
                 detail_type = detail.get("type", "")
