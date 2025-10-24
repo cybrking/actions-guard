@@ -26,30 +26,73 @@ ActionsGuard leverages [OpenSSF Scorecard](https://github.com/ossf/scorecard) to
 
 ## Installation
 
-### Via pip (Recommended)
+### Prerequisites
+
+**Important**: ActionsGuard requires [OpenSSF Scorecard](https://github.com/ossf/scorecard) to be installed first.
+
+#### Option 1: Download Scorecard Binary (Recommended)
+
+```bash
+# macOS (Apple Silicon)
+wget https://github.com/ossf/scorecard/releases/latest/download/scorecard_darwin_arm64
+chmod +x scorecard_darwin_arm64
+sudo mv scorecard_darwin_arm64 /usr/local/bin/scorecard
+
+# macOS (Intel)
+wget https://github.com/ossf/scorecard/releases/latest/download/scorecard_darwin_amd64
+chmod +x scorecard_darwin_amd64
+sudo mv scorecard_darwin_amd64 /usr/local/bin/scorecard
+
+# Linux
+wget https://github.com/ossf/scorecard/releases/latest/download/scorecard_linux_amd64
+chmod +x scorecard_linux_amd64
+sudo mv scorecard_linux_amd64 /usr/local/bin/scorecard
+```
+
+#### Option 2: Install with Go
+
+```bash
+# If you have Go 1.21+ installed
+go install github.com/ossf/scorecard/v4/cmd/scorecard@latest
+
+# Make sure $GOPATH/bin is in your PATH
+export PATH=$PATH:$(go env GOPATH)/bin
+```
+
+Verify installation:
+```bash
+scorecard version
+```
+
+### Install ActionsGuard
+
+#### Development Installation (Current Method)
+
+Since ActionsGuard is not yet published to PyPI, install from source:
+
+```bash
+# Clone the repository
+git clone https://github.com/cybrking/actions-guard.git
+cd actions-guard
+
+# Create virtual environment (recommended)
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Install ActionsGuard in development mode
+pip install -e .
+
+# Verify installation
+actionsguard --version
+```
+
+#### Future: Via pip (After PyPI Publication)
 
 ```bash
 pip install actionsguard
-```
-
-### From source
-
-```bash
-git clone https://github.com/your-username/actionsguard.git
-cd actionsguard
-pip install -e .
-```
-
-### Prerequisites
-
-ActionsGuard requires [OpenSSF Scorecard](https://github.com/ossf/scorecard) to be installed:
-
-```bash
-# Using Go
-go install github.com/ossf/scorecard/v5/cmd/scorecard@latest
-
-# Or download from releases
-# https://github.com/ossf/scorecard/releases
 ```
 
 ## Quick Start
@@ -244,8 +287,8 @@ GitHub-flavored markdown with emojis and collapsible sections, perfect for:
 
 ```bash
 # Clone repository
-git clone https://github.com/your-username/actionsguard.git
-cd actionsguard
+git clone https://github.com/cybrking/actions-guard.git
+cd actions-guard
 
 # Create virtual environment
 python -m venv venv
@@ -317,23 +360,79 @@ stage('Security Scan') {
 
 ### Common Issues
 
-**Scorecard not found**
+**1. Scorecard Installation Error**
+
+```bash
+go: module github.com/ossf/scorecard/v5@latest found (v5.3.0),
+but does not contain package github.com/ossf/scorecard/v5/cmd/scorecard
+```
+
+**Solution**: Use the correct version (v4) or download the binary directly:
+
+```bash
+# Correct Go command
+go install github.com/ossf/scorecard/v4/cmd/scorecard@latest
+
+# Or download binary (recommended)
+# See installation instructions above
+```
+
+**2. ActionsGuard Not Found on PyPI**
+
+```bash
+ERROR: Could not find a version that satisfies the requirement actionsguard
+```
+
+**Solution**: ActionsGuard is not yet published to PyPI. Install from source:
+
+```bash
+git clone https://github.com/cybrking/actions-guard.git
+cd actions-guard
+pip install -e .
+```
+
+**3. Scorecard Command Not Found**
+
 ```bash
 Error: OpenSSF Scorecard not found
 ```
-Solution: Install Scorecard as described in [Prerequisites](#prerequisites)
 
-**Rate limit exceeded**
+**Solution**:
+- Ensure Scorecard binary is in your PATH
+- For Go installation, add to PATH: `export PATH=$PATH:$(go env GOPATH)/bin`
+- Verify with: `which scorecard` and `scorecard version`
+
+**4. GitHub API Rate Limit**
+
 ```bash
 Error: GitHub API rate limit exceeded
 ```
-Solution: Wait for rate limit reset or use a different token
 
-**No permissions**
+**Solution**:
+- Wait for rate limit reset (check: `curl -H "Authorization: token YOUR_TOKEN" https://api.github.com/rate_limit`)
+- Use a different token
+- Authenticated requests have higher limits (5000/hour vs 60/hour)
+
+**5. Organization Access Denied**
+
 ```bash
 Error: No permission to access organization
 ```
-Solution: Ensure token has `read:org` scope
+
+**Solution**: Ensure your GitHub token has the `read:org` scope
+
+**6. Python Project Not Found**
+
+```bash
+ERROR: file:///path does not appear to be a Python project
+```
+
+**Solution**: Make sure you're in the correct directory (should contain `setup.py` and `pyproject.toml`):
+
+```bash
+cd actions-guard  # Navigate to the cloned repository
+pip install -e .
+```
 
 ## Contributing
 

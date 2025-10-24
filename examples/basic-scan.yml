@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run ActionsGuard
-        uses: your-username/actionsguard@v1
+        uses: cybrking/actions-guard@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           repo-name: ${{ github.repository }}

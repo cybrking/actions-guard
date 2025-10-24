@@ -52,6 +52,8 @@ reports/
 !CONTRIBUTING.md
 !CHANGELOG.md
 !LICENSE.md
+!QUICKSTART.md
+!.github/PULL_REQUEST_TEMPLATE.md
 
 # Distribution
 *.whl
