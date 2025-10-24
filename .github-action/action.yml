@@ -1,0 +1,73 @@
+name: 'ActionsGuard Security Scanner'
+description: 'Scan GitHub Actions workflows for security vulnerabilities using OpenSSF Scorecard'
+author: 'Travis Felder'
+
+branding:
+  icon: 'shield'
+  color: 'blue'
+
+inputs:
+  github-token:
+    description: 'GitHub token for API access'
+    required: true
+  org-name:
+    description: 'Organization name to scan (defaults to current repository org)'
+    required: false
+  repo-name:
+    description: 'Single repository to scan (format: owner/repo)'
+    required: false
+  exclude-repos:
+    description: 'Comma-separated list of repository names to exclude'
+    required: false
+  only-repos:
+    description: 'Comma-separated list of repository names to scan (all others excluded)'
+    required: false
+  checks:
+    description: 'Comma-separated Scorecard checks to run'
+    required: false
+    default: 'Dangerous-Workflow,Token-Permissions,Pinned-Dependencies'
+  all-checks:
+    description: 'Run all Scorecard checks'
+    required: false
+    default: 'false'
+  output-format:
+    description: 'Report formats to generate (comma-separated: json,html,csv,markdown)'
+    required: false
+    default: 'html,json,csv,markdown'
+  fail-on-critical:
+    description: 'Fail the action if critical security issues are found'
+    required: false
+    default: 'false'
+  output-dir:
+    description: 'Directory to write reports to'
+    required: false
+    default: 'reports'
+
+outputs:
+  reports-path:
+    description: 'Path to generated reports'
+    value: ${{ steps.scan.outputs.reports-path }}
+  critical-count:
+    description: 'Number of critical issues found'
+    value: ${{ steps.scan.outputs.critical-count }}
+  overall-score:
+    description: 'Average security score across all repos'
+    value: ${{ steps.scan.outputs.overall-score }}
+  summary:
+    description: 'Scan summary in JSON format'
+    value: ${{ steps.scan.outputs.summary }}
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  env:
+    INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
+    INPUT_ORG_NAME: ${{ inputs.org-name }}
+    INPUT_REPO_NAME: ${{ inputs.repo-name }}
+    INPUT_EXCLUDE_REPOS: ${{ inputs.exclude-repos }}
+    INPUT_ONLY_REPOS: ${{ inputs.only-repos }}
+    INPUT_CHECKS: ${{ inputs.checks }}
+    INPUT_ALL_CHECKS: ${{ inputs.all-checks }}
+    INPUT_OUTPUT_FORMAT: ${{ inputs.output-format }}
+    INPUT_FAIL_ON_CRITICAL: ${{ inputs.fail-on-critical }}
+    INPUT_OUTPUT_DIR: ${{ inputs.output-dir }}
