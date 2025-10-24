@@ -2,8 +2,10 @@
 
 import sys
 import logging
+import json
 from pathlib import Path
 from typing import Optional, List
+from datetime import datetime
 
 import click
 from rich.console import Console
@@ -11,6 +13,8 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskPr
 
 from actionsguard.__version__ import __version__
 from actionsguard.scanner import Scanner
+from actionsguard.scorecard_runner import ScorecardRunner
+from actionsguard.models import ScanResult, ScanSummary, RiskLevel
 from actionsguard.utils.config import Config
 from actionsguard.utils.logging import setup_logger
 from actionsguard.reporters import JSONReporter, HTMLReporter, CSVReporter, MarkdownReporter
@@ -281,6 +285,102 @@ def _generate_reports(summary, config):
             logger.error(f"Failed to generate {format_name} report: {e}")
 
     return report_files
+
+
+@cli.command()
+@click.argument('scorecard_json', type=click.Path(exists=True))
+@click.option(
+    "--output",
+    "-o",
+    default="./reports",
+    help="Output directory for reports (default: ./reports)"
+)
+@click.option(
+    "--format",
+    "-f",
+    "formats",
+    default="html,markdown,csv",
+    help="Report formats (comma-separated: json,html,csv,markdown)"
+)
+@click.option(
+    "--repo-name",
+    help="Repository name (auto-detected from JSON if not provided)"
+)
+@click.pass_context
+def import_scorecard(ctx, scorecard_json, output, formats, repo_name):
+    """
+    Import Scorecard JSON report and generate beautiful reports.
+
+    This command takes an existing Scorecard JSON file and generates
+    user-friendly HTML, Markdown, and CSV reports.
+
+    Examples:
+
+      # Run Scorecard yourself, then import
+      scorecard --repo=github.com/kubernetes/kubernetes --format=json > scorecard.json
+      actionsguard import scorecard.json
+
+      # Specify output directory
+      actionsguard import scorecard.json --output ./my-reports
+
+      # Generate only HTML and Markdown
+      actionsguard import scorecard.json --format html,markdown
+    """
+    try:
+        console.print("\n[bold blue]📊 ActionsGuard Report Generator[/bold blue]\n")
+
+        # Read Scorecard JSON
+        console.print(f"[cyan]Reading Scorecard report:[/cyan] {scorecard_json}")
+        with open(scorecard_json, 'r') as f:
+            scorecard_data = json.load(f)
+
+        # Parse the data (don't check for scorecard installation)
+        scorecard_runner = ScorecardRunner(check_install=False)
+        checks = scorecard_runner.parse_results(scorecard_data)
+        score = scorecard_runner.get_overall_score(scorecard_data)
+        metadata = scorecard_runner.get_metadata(scorecard_data)
+
+        # Get repo name
+        if not repo_name:
+            repo_name = scorecard_data.get('repo', {}).get('name', 'unknown-repo')
+            repo_name = repo_name.replace('github.com/', '')
+
+        repo_url = f"https://github.com/{repo_name}"
+
+        # Create scan result
+        result = ScanResult(
+            repo_name=repo_name,
+            repo_url=repo_url,
+            score=score,
+            risk_level=ScanResult.calculate_risk_level(score),
+            scan_date=datetime.now(),
+            checks=checks,
+            metadata=metadata,
+        )
+
+        # Create summary
+        summary = ScanSummary.from_results([result])
+
+        # Display summary
+        console.print(f"\n[bold green]✓[/bold green] Successfully parsed Scorecard data\n")
+        _display_summary(summary)
+
+        # Generate reports
+        console.print("\n[bold]Generating reports...[/bold]\n")
+
+        config = Config(output_dir=output, formats=formats.split(","))
+        _generate_reports(summary, config)
+
+        console.print(f"\n[green]✅ Reports generated in:[/green] {output}\n")
+
+    except json.JSONDecodeError as e:
+        console.print(f"[red]Error: Invalid JSON file - {e}[/red]")
+        sys.exit(2)
+    except Exception as e:
+        console.print(f"[red]Error: {e}[/red]")
+        if ctx.obj.get("verbose"):
+            console.print_exception()
+        sys.exit(2)
 
 
 if __name__ == "__main__":

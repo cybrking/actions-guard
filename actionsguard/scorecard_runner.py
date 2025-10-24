@@ -16,15 +16,17 @@ logger = logging.getLogger("actionsguard")
 class ScorecardRunner:
     """Runner for OpenSSF Scorecard CLI."""
 
-    def __init__(self, timeout: int = 300):
+    def __init__(self, timeout: int = 300, check_install: bool = True):
         """
         Initialize Scorecard runner.
 
         Args:
             timeout: Maximum time (seconds) to run scorecard
+            check_install: Whether to check if scorecard is installed (set False for import mode)
         """
         self.timeout = timeout
-        self._check_installation()
+        if check_install:
+            self._check_installation()
 
     def _check_installation(self) -> None:
         """
