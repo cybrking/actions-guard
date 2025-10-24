@@ -102,7 +102,47 @@ actionsguard --version
 
 ## Step 3: Set Up GitHub Token
 
-### Create a GitHub Personal Access Token
+### Option 1: Fine-grained Token (Recommended) ⭐
+
+Fine-grained tokens are more secure and provide granular access control.
+
+**Create the token:**
+
+1. Go to: https://github.com/settings/personal-access-tokens/new
+2. Fill in the details:
+   - **Token name**: "ActionsGuard Scanner"
+   - **Expiration**: 90 days (or custom)
+   - **Description**: "Security scanning for GitHub Actions workflows"
+
+3. **Repository access**:
+   - For single repo scanning: Select "Only select repositories" → Choose your repos
+   - For organization scanning: Select "All repositories" (for your organizations)
+
+4. **Permissions** - Set these Repository permissions:
+   - ✅ **Actions**: Read (to access workflow files)
+   - ✅ **Contents**: Read (to read repository contents)
+   - ✅ **Metadata**: Read (automatically included)
+
+5. **Organization permissions** (for org scanning):
+   - ✅ **Members**: Read (to list organization repositories)
+
+6. Click "Generate token"
+7. **Copy the token** - it starts with `github_pat_`
+
+**Set the token:**
+
+```bash
+# Export as environment variable
+export GITHUB_TOKEN="github_pat_YourTokenHere"
+
+# Or add to your shell config for persistence
+echo 'export GITHUB_TOKEN="github_pat_YourTokenHere"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+### Option 2: Classic Token (Alternative)
+
+Classic tokens have broader access but are simpler to set up.
 
 1. Go to: https://github.com/settings/tokens/new
 2. Name it: "ActionsGuard Scanner"
@@ -110,9 +150,7 @@ actionsguard --version
    - ✅ `repo` (for private repos) or `public_repo` (for public only)
    - ✅ `read:org` (for organization scanning)
 4. Click "Generate token"
-5. **Copy the token** (you won't see it again!)
-
-### Set the Token
+5. **Copy the token** - it starts with `ghp_`
 
 ```bash
 # Export as environment variable
@@ -121,6 +159,16 @@ export GITHUB_TOKEN="ghp_YourTokenHere"
 # Or add to your shell config for persistence
 echo 'export GITHUB_TOKEN="ghp_YourTokenHere"' >> ~/.zshrc
 source ~/.zshrc
+```
+
+### Verify Token Setup
+
+```bash
+# Check if token is set
+echo $GITHUB_TOKEN
+
+# Test token (should show your username)
+curl -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/user | grep login
 ```
 
 ---

@@ -99,13 +99,33 @@ pip install actionsguard
 
 ### 1. Set up GitHub Token
 
+**Option A: Fine-grained Token (Recommended)**
+
+Create at: https://github.com/settings/personal-access-tokens/new
+
+**Permissions needed:**
+- Repository permissions:
+  - Actions: Read
+  - Contents: Read
+  - Metadata: Read
+- Organization permissions (for org scanning):
+  - Members: Read
+
 ```bash
-export GITHUB_TOKEN="your_github_personal_access_token"
+export GITHUB_TOKEN="github_pat_your_token_here"
 ```
 
-The token needs the following scopes:
+**Option B: Classic Token**
+
+Create at: https://github.com/settings/tokens/new
+
+**Scopes needed:**
 - `repo` (for private repos) or `public_repo` (for public repos only)
 - `read:org` (for organization scanning)
+
+```bash
+export GITHUB_TOKEN="ghp_your_token_here"
+```
 
 ### 2. Scan a Repository
 
@@ -419,7 +439,10 @@ Error: GitHub API rate limit exceeded
 Error: No permission to access organization
 ```
 
-**Solution**: Ensure your GitHub token has the `read:org` scope
+**Solution**:
+- For Fine-grained tokens: Ensure "Members: Read" permission is granted under Organization permissions
+- For Classic tokens: Ensure your token has the `read:org` scope
+- Verify you're a member of the organization or have appropriate access
 
 **6. Python Project Not Found**
 
