@@ -934,6 +934,50 @@ def debug(user: Optional[str], token: Optional[str]):
         console.print("[cyan]Testing GitHub API connection...[/cyan]")
         client = GitHubClient(config.github_token)
 
+        # Check token scopes
+        try:
+            import requests
+            headers = {"Authorization": f"token {config.github_token}"}
+            resp = requests.get("https://api.github.com/user", headers=headers)
+            scopes = resp.headers.get("X-OAuth-Scopes", "")
+
+            console.print("[cyan]Token Scopes:[/cyan]")
+            if scopes:
+                scopes_list = [s.strip() for s in scopes.split(",")]
+                for scope in scopes_list:
+                    console.print(f"  ✓ {scope}")
+
+                # Check for required scopes
+                has_repo = "repo" in scopes_list
+                has_public_repo = "public_repo" in scopes_list
+
+                if not has_repo and not has_public_repo:
+                    console.print("\n[red]⚠️  WARNING: Token is missing repository access scopes![/red]")
+                    console.print("  You need either 'repo' (for private repos) or 'public_repo' (for public repos only)")
+                    console.print("\n[yellow]How to fix:[/yellow]")
+                    console.print("  1. Go to https://github.com/settings/tokens")
+                    console.print("  2. Create a new token (classic)")
+                    console.print("  3. Select the 'repo' scope (full control of private repositories)")
+                    console.print("  4. Set: export GITHUB_TOKEN='your_new_token'")
+                elif has_public_repo and not has_repo:
+                    console.print("\n[yellow]⚠️  NOTE: Token only has 'public_repo' scope (can't see private repos)[/yellow]")
+                    console.print("  To see private repos, create a token with 'repo' scope")
+                    console.print("\n[yellow]How to fix:[/yellow]")
+                    console.print("  1. Go to https://github.com/settings/tokens")
+                    console.print("  2. Create a new token (classic) with 'repo' scope")
+                    console.print("  3. Set: export GITHUB_TOKEN='your_new_token'")
+                else:
+                    console.print("\n[green]✓ Token has 'repo' scope - can access private repositories[/green]")
+            else:
+                console.print("  [yellow]No OAuth scopes detected (this is a fine-grained token)[/yellow]")
+                console.print("\n[cyan]For fine-grained tokens, ensure you have:[/cyan]")
+                console.print("  • Contents: Read access")
+                console.print("  • Metadata: Read access")
+                console.print("  • Actions: Read access (for workflow scanning)")
+            console.print()
+        except Exception as e:
+            console.print(f"[dim]  (Unable to check token scopes: {e})[/dim]\n")
+
         # Get authenticated user
         auth_user = client.github.get_user()
         console.print(f"[green]✓ Authenticated as:[/green] {auth_user.login}")
@@ -961,11 +1005,26 @@ def debug(user: Optional[str], token: Optional[str]):
         console.print(f"\n[bold]Total repositories found: {len(repos_list)}[/bold]\n")
 
         if not repos_list:
-            console.print("[yellow]No repositories found![/yellow]\n")
-            console.print("Possible reasons:")
-            console.print("  • User has no public repositories")
-            console.print("  • Token doesn't have permission to see private repos")
-            console.print("  • User account doesn't exist or is private")
+            console.print("[yellow]⚠️  No repositories found![/yellow]\n")
+
+            is_own_account = (not user) or (user.lower() == auth_user.login.lower())
+
+            if is_own_account:
+                # Scanning their own account but found no repos
+                console.print("[red]You're scanning your own account but no repos were found.[/red]\n")
+                console.print("This usually means your repos are private and your token doesn't have the 'repo' scope.\n")
+                console.print("[yellow]Solution:[/yellow]")
+                console.print("  1. Go to https://github.com/settings/tokens")
+                console.print("  2. Create a new Personal Access Token (classic)")
+                console.print("  3. Select the 'repo' scope checkbox (full control of private repositories)")
+                console.print("  4. Generate the token and copy it")
+                console.print("  5. Set it: export GITHUB_TOKEN='your_new_token_here'")
+                console.print("  6. Run the debug command again")
+            else:
+                console.print("Possible reasons:")
+                console.print("  • User has no public repositories")
+                console.print("  • User's repositories are all private (and your token can't see them)")
+                console.print("  • User account doesn't exist")
             console.print()
             return
 
