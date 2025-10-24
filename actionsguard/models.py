@@ -223,6 +223,91 @@ class ScanSummary:
     results: List[ScanResult] = field(default_factory=list)
     scan_duration: Optional[float] = None
 
+    def get_executive_summary(self) -> Dict[str, Any]:
+        """
+        Generate executive summary statistics.
+
+        Returns:
+            Dict with executive-level metrics
+        """
+        # Risk distribution
+        risk_distribution = {
+            "CRITICAL": 0,
+            "HIGH": 0,
+            "MEDIUM": 0,
+            "LOW": 0,
+        }
+        for result in self.results:
+            if result.error is None:
+                risk_distribution[result.risk_level.value] += 1
+
+        # Issue frequency analysis
+        issue_types = {}
+        repos_affected_by_issue = {}
+
+        for result in self.results:
+            if result.error:
+                continue
+            for check in result.checks:
+                check_name = check.name
+                if check_name not in issue_types:
+                    issue_types[check_name] = {
+                        "count": 0,
+                        "repos_affected": set(),
+                        "max_severity": check.severity,
+                    }
+
+                if check.status == Status.FAIL or check.score < 7:
+                    issue_types[check_name]["count"] += 1
+                    issue_types[check_name]["repos_affected"].add(result.repo_name)
+
+                    # Track highest severity
+                    current_sev = issue_types[check_name]["max_severity"]
+                    if self._severity_rank(check.severity) > self._severity_rank(current_sev):
+                        issue_types[check_name]["max_severity"] = check.severity
+
+        # Convert sets to counts and sort by frequency
+        top_issues = []
+        for issue_name, data in issue_types.items():
+            if data["count"] > 0:
+                top_issues.append({
+                    "name": issue_name,
+                    "instances": data["count"],
+                    "repos_affected": len(data["repos_affected"]),
+                    "severity": data["max_severity"].value,
+                })
+
+        top_issues.sort(key=lambda x: (x["instances"], x["repos_affected"]), reverse=True)
+
+        return {
+            "total_repositories": self.total_repos,
+            "successful_scans": self.successful_scans,
+            "failed_scans": self.failed_scans,
+            "average_score": self.average_score,
+            "scan_duration": self.scan_duration,
+            "risk_distribution": risk_distribution,
+            "issue_counts": {
+                "critical": self.critical_count,
+                "high": self.high_count,
+                "medium": self.medium_count,
+                "low": self.low_count,
+                "total": self.critical_count + self.high_count + self.medium_count + self.low_count,
+            },
+            "top_issues": top_issues[:10],  # Top 10 most common issues
+        }
+
+    @staticmethod
+    def _severity_rank(severity: Severity) -> int:
+        """Rank severity for comparison."""
+        ranks = {
+            Severity.CRITICAL: 4,
+            Severity.HIGH: 3,
+            Severity.MEDIUM: 2,
+            Severity.LOW: 1,
+            Severity.INFO: 0,
+        }
+        return ranks.get(severity, 0)
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
@@ -235,6 +320,7 @@ class ScanSummary:
             "medium_count": self.medium_count,
             "low_count": self.low_count,
             "scan_duration": self.scan_duration,
+            "executive_summary": self.get_executive_summary(),
             "results": [result.to_dict() for result in self.results],
         }
 
