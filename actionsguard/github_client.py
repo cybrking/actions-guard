@@ -2,7 +2,8 @@
 
 import logging
 import time
-from typing import List, Optional
+from typing import List, Optional, Callable, Any
+from functools import wraps
 
 from github import Github, GithubException, RateLimitExceededException
 from github.Repository import Repository
@@ -10,6 +11,114 @@ from github.Organization import Organization
 
 
 logger = logging.getLogger("actionsguard")
+
+
+def retry_with_backoff(
+    max_retries: int = 3,
+    base_delay: float = 1.0,
+    max_delay: float = 60.0,
+    exponential_base: float = 2.0
+):
+    """
+    Decorator for retrying functions with exponential backoff.
+
+    Args:
+        max_retries: Maximum number of retry attempts
+        base_delay: Initial delay in seconds
+        max_delay: Maximum delay in seconds
+        exponential_base: Base for exponential backoff calculation
+
+    Returns:
+        Decorated function with retry logic
+    """
+    def decorator(func: Callable) -> Callable:
+        @wraps(func)
+        def wrapper(*args, **kwargs) -> Any:
+            retries = 0
+            delay = base_delay
+
+            while retries <= max_retries:
+                try:
+                    return func(*args, **kwargs)
+
+                except RateLimitExceededException as e:
+                    # Special handling for rate limits - wait until reset
+                    if retries >= max_retries:
+                        logger.error("Rate limit exceeded. Max retries reached.")
+                        raise
+
+                    # Get self from args if this is a method
+                    self_obj = args[0] if args and hasattr(args[0], 'github') else None
+                    if self_obj and hasattr(self_obj, 'github'):
+                        rate_limit = self_obj.github.get_rate_limit()
+                        reset_time = rate_limit.core.reset
+                        sleep_time = min((reset_time - time.time()) + 10, max_delay)
+
+                        logger.warning(
+                            f"Rate limit exceeded. Waiting {sleep_time:.0f}s "
+                            f"until reset (attempt {retries + 1}/{max_retries})"
+                        )
+                        time.sleep(max(sleep_time, 0))
+                    else:
+                        # Fallback to exponential backoff
+                        logger.warning(f"Rate limit exceeded. Retrying in {delay:.1f}s")
+                        time.sleep(delay)
+
+                    retries += 1
+                    delay = min(delay * exponential_base, max_delay)
+
+                except GithubException as e:
+                    # Retry on specific transient errors
+                    if e.status in (500, 502, 503, 504):  # Server errors
+                        if retries >= max_retries:
+                            logger.error(f"GitHub server error {e.status}. Max retries reached.")
+                            raise
+
+                        logger.warning(
+                            f"GitHub server error {e.status}. Retrying in {delay:.1f}s "
+                            f"(attempt {retries + 1}/{max_retries})"
+                        )
+                        time.sleep(delay)
+                        retries += 1
+                        delay = min(delay * exponential_base, max_delay)
+
+                    elif e.status == 403 and 'rate limit' in str(e).lower():
+                        # Secondary rate limit or abuse detection
+                        if retries >= max_retries:
+                            logger.error("Secondary rate limit exceeded. Max retries reached.")
+                            raise
+
+                        retry_after = delay * (retries + 1)  # Increasing delay
+                        logger.warning(
+                            f"Secondary rate limit hit. Backing off for {retry_after:.0f}s "
+                            f"(attempt {retries + 1}/{max_retries})"
+                        )
+                        time.sleep(retry_after)
+                        retries += 1
+                        delay = min(delay * exponential_base, max_delay)
+                    else:
+                        # Don't retry on client errors (4xx except rate limits)
+                        raise
+
+                except (ConnectionError, TimeoutError) as e:
+                    # Network errors - retry with backoff
+                    if retries >= max_retries:
+                        logger.error(f"Network error: {e}. Max retries reached.")
+                        raise
+
+                    logger.warning(
+                        f"Network error: {e}. Retrying in {delay:.1f}s "
+                        f"(attempt {retries + 1}/{max_retries})"
+                    )
+                    time.sleep(delay)
+                    retries += 1
+                    delay = min(delay * exponential_base, max_delay)
+
+            # Should not reach here, but just in case
+            raise Exception(f"Max retries ({max_retries}) exceeded")
+
+        return wrapper
+    return decorator
 
 
 class GitHubClient:
@@ -198,6 +307,7 @@ class GitHubClient:
                 )
             raise
 
+    @retry_with_backoff(max_retries=3, base_delay=1.0, max_delay=30.0)
     def get_repository(self, repo_full_name: str) -> Repository:
         """
         Get a single repository by full name (owner/repo).
@@ -244,44 +354,82 @@ class GitHubClient:
                 f"Resets at {core.reset}"
             )
 
-    def _paginate_with_retry(self, method, max_retries: int = 3):
+    def _paginate_with_retry(
+        self,
+        method,
+        max_retries: int = 3,
+        base_delay: float = 1.0,
+        max_delay: float = 60.0
+    ):
         """
-        Paginate through GitHub API results with retry on rate limit.
+        Paginate through GitHub API results with exponential backoff retry.
 
         Args:
             method: PyGithub method to call
             max_retries: Maximum number of retries
+            base_delay: Initial delay in seconds for exponential backoff
+            max_delay: Maximum delay in seconds
 
         Yields:
             Items from paginated results
         """
         retries = 0
-        while retries < max_retries:
+        delay = base_delay
+
+        while retries <= max_retries:
             try:
                 for item in method():
                     yield item
                 break  # Success, exit retry loop
 
             except RateLimitExceededException:
-                retries += 1
                 if retries >= max_retries:
                     logger.error("Rate limit exceeded. Max retries reached.")
                     raise
 
                 rate_limit = self.github.get_rate_limit()
                 reset_time = rate_limit.core.reset
-                sleep_time = (reset_time - time.time()) + 10  # Add 10s buffer
+                sleep_time = min((reset_time - time.time()) + 10, max_delay)
 
                 logger.warning(
-                    f"Rate limit exceeded. Waiting {sleep_time:.0f} seconds "
-                    f"until reset at {reset_time}"
+                    f"Rate limit exceeded. Waiting {sleep_time:.0f}s until reset "
+                    f"(attempt {retries + 1}/{max_retries})"
                 )
                 time.sleep(max(sleep_time, 0))
+                retries += 1
 
             except GithubException as e:
-                logger.error(f"GitHub API error: {e}")
-                raise
+                # Retry on server errors with exponential backoff
+                if e.status in (500, 502, 503, 504):
+                    if retries >= max_retries:
+                        logger.error(f"GitHub server error {e.status}. Max retries reached.")
+                        raise
 
+                    logger.warning(
+                        f"GitHub server error {e.status}. Retrying in {delay:.1f}s "
+                        f"(attempt {retries + 1}/{max_retries})"
+                    )
+                    time.sleep(delay)
+                    retries += 1
+                    delay = min(delay * 2.0, max_delay)  # Exponential backoff
+                else:
+                    logger.error(f"GitHub API error: {e}")
+                    raise
+
+            except (ConnectionError, TimeoutError) as e:
+                if retries >= max_retries:
+                    logger.error(f"Network error: {e}. Max retries reached.")
+                    raise
+
+                logger.warning(
+                    f"Network error: {e}. Retrying in {delay:.1f}s "
+                    f"(attempt {retries + 1}/{max_retries})"
+                )
+                time.sleep(delay)
+                retries += 1
+                delay = min(delay * 2.0, max_delay)
+
+    @retry_with_backoff(max_retries=2, base_delay=0.5, max_delay=10.0)
     def has_workflows(self, repo: Repository) -> bool:
         """
         Check if repository has GitHub Actions workflows.
