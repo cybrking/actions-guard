@@ -40,9 +40,13 @@ class HTMLReporter(BaseReporter):
         """
         output_path = self.output_dir / f"{filename}.html"
 
+        # Get executive summary
+        exec_summary = summary.get_executive_summary()
+
         # Prepare template data
         template_data = {
             "summary": summary,
+            "exec_summary": exec_summary,
             "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "critical_repos": [
                 r for r in summary.results
