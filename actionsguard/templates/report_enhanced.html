@@ -435,7 +435,7 @@
             <!-- Repository Details -->
             <h2 style="color: #2c3e50; margin: 40px 0 25px 0; font-size: 1.8em;">📁 Repository Details</h2>
 
-            {% for result in summary.results if not result.error %}
+            {% for result in critical_repos + high_repos + medium_repos + low_repos %}
             <div class="repo-section">
                 <div class="repo-header">
                     <h3><a href="{{ result.repo_url }}" target="_blank">{{ result.repo_name }}</a></h3>
@@ -477,13 +477,59 @@
                         </div>
                         {% endfor %}
                     {% else %}
+                        {% if result.metadata.has_workflows == false %}
                         <div class="no-workflows">
-                            {% if result.metadata.has_workflows == false %}
                             No GitHub Actions workflows found in this repository.
-                            {% else %}
-                            No security issues detected in workflows.
+                        </div>
+                        {% else %}
+                        {# Show failed/warning checks as fallback when no workflow-level findings #}
+                        {% set failed_checks = [] %}
+                        {% set warn_checks = [] %}
+                        {% for check in result.checks %}
+                            {% if check.status.value == "FAIL" %}
+                                {% set _ = failed_checks.append(check) %}
+                            {% elif check.status.value == "WARN" %}
+                                {% set _ = warn_checks.append(check) %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if failed_checks or warn_checks %}
+                        <h4 style="color: #2c3e50; margin: 25px 0 15px 0;">Security Issues Detected</h4>
+                        {% for check in failed_checks %}
+                        <div class="finding {{ check.severity }}">
+                            <div class="finding-header">
+                                <div class="finding-check">❌ {{ check.name }}</div>
+                                <span class="finding-severity {{ check.severity }}">{{ check.severity }}</span>
+                            </div>
+                            <div class="finding-message">Score: {{ check.score }}/10 - {{ check.reason }}</div>
+                            {% if check.documentation_url %}
+                            <div class="finding-recommendation">
+                                <strong>📚 Documentation:</strong>
+                                <p><a href="{{ check.documentation_url }}" target="_blank">{{ check.documentation_url }}</a></p>
+                            </div>
                             {% endif %}
                         </div>
+                        {% endfor %}
+                        {% for check in warn_checks %}
+                        <div class="finding {{ check.severity }}">
+                            <div class="finding-header">
+                                <div class="finding-check">⚠️ {{ check.name }}</div>
+                                <span class="finding-severity {{ check.severity }}">{{ check.severity }}</span>
+                            </div>
+                            <div class="finding-message">Score: {{ check.score }}/10 - {{ check.reason }}</div>
+                            {% if check.documentation_url %}
+                            <div class="finding-recommendation">
+                                <strong>📚 Documentation:</strong>
+                                <p><a href="{{ check.documentation_url }}" target="_blank">{{ check.documentation_url }}</a></p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="no-workflows">
+                            ✅ All security checks passed.
+                        </div>
+                        {% endif %}
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>

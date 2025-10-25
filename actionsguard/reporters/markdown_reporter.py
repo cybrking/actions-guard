@@ -84,38 +84,36 @@ class MarkdownReporter(BaseReporter):
             # Repository Details
             f.write("## 📁 Repository Details\n\n")
 
-            # Results by risk level
+            # Results by risk level (sorted highest to lowest)
             critical_repos = [r for r in summary.results if r.risk_level == RiskLevel.CRITICAL and not r.error]
             high_repos = [r for r in summary.results if r.risk_level == RiskLevel.HIGH and not r.error]
             medium_repos = [r for r in summary.results if r.risk_level == RiskLevel.MEDIUM and not r.error]
             low_repos = [r for r in summary.results if r.risk_level == RiskLevel.LOW and not r.error]
             error_repos = [r for r in summary.results if r.error]
 
-            # Critical Risk Repos
+            # Critical Risk Repos (highest priority first)
             if critical_repos:
-                f.write("## 🔴 Critical Risk Repositories\n\n")
+                f.write("### 🔴 Critical Risk Repositories\n\n")
                 for result in critical_repos:
                     self._write_repository_section(f, result)
 
             # High Risk Repos
             if high_repos:
-                f.write("## 🟠 High Risk Repositories\n\n")
+                f.write("### 🟠 High Risk Repositories\n\n")
                 for result in high_repos:
                     self._write_repository_section(f, result)
 
             # Medium Risk Repos
             if medium_repos:
-                f.write("## 🟡 Medium Risk Repositories\n\n")
+                f.write("### 🟡 Medium Risk Repositories\n\n")
                 for result in medium_repos:
                     self._write_repository_section(f, result)
 
-            # Low Risk Repos (collapsed)
+            # Low Risk Repos
             if low_repos:
-                f.write("## 🟢 Low Risk Repositories\n\n")
-                f.write("<details>\n<summary>Click to expand</summary>\n\n")
+                f.write("### 🟢 Low Risk Repositories\n\n")
                 for result in low_repos:
                     self._write_repository_section(f, result, collapsed=True)
-                f.write("</details>\n\n")
 
             # Failed Scans
             if error_repos:
@@ -167,34 +165,42 @@ class MarkdownReporter(BaseReporter):
                     f.write("---\n\n")
         else:
             # Fallback to check-based view if no workflow-level findings
-            # Failed checks
             failed_checks = [c for c in result.checks if c.status == Status.FAIL]
-            if failed_checks:
-                f.write("#### ❌ Failed Checks\n\n")
-                for check in failed_checks:
-                    severity_emoji = self._get_severity_emoji(check.severity)
-                    f.write(f"- **{check.name}** {severity_emoji}\n")
-                    f.write(f"  - Score: {check.score}/10\n")
-                    f.write(f"  - Reason: {check.reason}\n")
-                    if check.documentation_url:
-                        f.write(f"  - [Documentation]({check.documentation_url})\n")
-                    f.write("\n")
-
-            # Warning checks
             warn_checks = [c for c in result.checks if c.status == Status.WARN]
-            if warn_checks and not collapsed:
-                f.write("#### ⚠️ Warning Checks\n\n")
-                for check in warn_checks:
-                    f.write(f"- **{check.name}** (Score: {check.score}/10)\n")
-                    f.write(f"  - {check.reason}\n\n")
 
-            # Passed checks (collapsed)
-            pass_checks = [c for c in result.checks if c.status == Status.PASS]
-            if pass_checks and not collapsed:
-                f.write("<details>\n<summary>✅ Passed Checks</summary>\n\n")
-                for check in pass_checks:
-                    f.write(f"- {check.name} (Score: {check.score}/10)\n")
-                f.write("\n</details>\n\n")
+            if failed_checks or warn_checks:
+                # Failed checks
+                if failed_checks:
+                    f.write("#### ❌ Security Issues Detected\n\n")
+                    for check in failed_checks:
+                        severity_emoji = self._get_severity_emoji(check.severity)
+                        f.write(f"**{severity_emoji} {check.name}** ({check.severity.value})\n\n")
+                        f.write(f"Score: {check.score}/10 - {check.reason}\n\n")
+                        if check.documentation_url:
+                            f.write(f"> 📚 **Documentation:** [{check.documentation_url}]({check.documentation_url})\n\n")
+                        f.write("---\n\n")
+
+                # Warning checks
+                if warn_checks and not collapsed:
+                    f.write("#### ⚠️ Warnings\n\n")
+                    for check in warn_checks:
+                        severity_emoji = self._get_severity_emoji(check.severity)
+                        f.write(f"**{severity_emoji} {check.name}** ({check.severity.value})\n\n")
+                        f.write(f"Score: {check.score}/10 - {check.reason}\n\n")
+                        if check.documentation_url:
+                            f.write(f"> 📚 **Documentation:** [{check.documentation_url}]({check.documentation_url})\n\n")
+                        f.write("---\n\n")
+
+                # Passed checks (collapsed)
+                pass_checks = [c for c in result.checks if c.status == Status.PASS]
+                if pass_checks and not collapsed:
+                    f.write("<details>\n<summary>✅ Passed Checks</summary>\n\n")
+                    for check in pass_checks:
+                        f.write(f"- {check.name} (Score: {check.score}/10)\n")
+                    f.write("\n</details>\n\n")
+            else:
+                # All checks passed
+                f.write("✅ All security checks passed.\n\n")
 
         f.write("---\n\n")
 
