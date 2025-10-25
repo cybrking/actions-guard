@@ -7,6 +7,15 @@ from datetime import datetime
 from typing import List, Optional
 
 from github.Repository import Repository
+from rich.progress import (
+    Progress,
+    SpinnerColumn,
+    TextColumn,
+    BarColumn,
+    TaskProgressColumn,
+    TimeRemainingColumn,
+    TimeElapsedColumn,
+)
 
 from actionsguard.github_client import GitHubClient
 from actionsguard.scorecard_runner import ScorecardRunner
@@ -21,17 +30,19 @@ logger = logging.getLogger("actionsguard")
 class Scanner:
     """Main scanner for ActionsGuard."""
 
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, show_progress: bool = True):
         """
         Initialize scanner.
 
         Args:
             config: Scanner configuration
+            show_progress: Show progress bars during scanning
         """
         self.config = config
         self.github_client = GitHubClient(config.github_token)
         self.scorecard_runner = ScorecardRunner(timeout=config.scorecard_timeout)
         self.workflow_analyzer = WorkflowAnalyzer()
+        self.show_progress = show_progress
 
     def scan_repository(self, repo: Repository) -> ScanResult:
         """
@@ -145,7 +156,7 @@ class Scanner:
 
     def _scan_parallel(self, repos: List[Repository]) -> List[ScanResult]:
         """
-        Scan repositories in parallel.
+        Scan repositories in parallel with progress tracking.
 
         Args:
             repos: List of repository objects
@@ -154,31 +165,91 @@ class Scanner:
             List of ScanResult objects
         """
         results = []
-        with ThreadPoolExecutor(max_workers=self.config.parallel_scans) as executor:
-            # Submit all tasks
-            future_to_repo = {
-                executor.submit(self.scan_repository, repo): repo
-                for repo in repos
-            }
 
-            # Collect results as they complete
-            for future in as_completed(future_to_repo):
-                try:
-                    result = future.result()
-                    results.append(result)
-                except Exception as e:
-                    repo = future_to_repo[future]
-                    logger.error(f"Unexpected error scanning {repo.full_name}: {e}")
-                    results.append(
-                        ScanResult(
-                            repo_name=repo.full_name,
-                            repo_url=repo.html_url,
-                            score=0.0,
-                            risk_level=RiskLevel.CRITICAL,
-                            scan_date=datetime.now(),
-                            error=str(e),
+        if not self.show_progress:
+            # Original behavior without progress bar
+            with ThreadPoolExecutor(max_workers=self.config.parallel_scans) as executor:
+                future_to_repo = {
+                    executor.submit(self.scan_repository, repo): repo
+                    for repo in repos
+                }
+
+                for future in as_completed(future_to_repo):
+                    try:
+                        result = future.result()
+                        results.append(result)
+                    except Exception as e:
+                        repo = future_to_repo[future]
+                        logger.error(f"Unexpected error scanning {repo.full_name}: {e}")
+                        results.append(
+                            ScanResult(
+                                repo_name=repo.full_name,
+                                repo_url=repo.html_url,
+                                score=0.0,
+                                risk_level=RiskLevel.CRITICAL,
+                                scan_date=datetime.now(),
+                                error=str(e),
+                            )
                         )
-                    )
+            return results
+
+        # With progress bar
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[bold blue]{task.description}"),
+            BarColumn(),
+            TaskProgressColumn(),
+            TimeElapsedColumn(),
+            TimeRemainingColumn(),
+        ) as progress:
+            task = progress.add_task(
+                f"[cyan]Scanning {len(repos)} repositories...",
+                total=len(repos)
+            )
+
+            with ThreadPoolExecutor(max_workers=self.config.parallel_scans) as executor:
+                future_to_repo = {
+                    executor.submit(self.scan_repository, repo): repo
+                    for repo in repos
+                }
+
+                for future in as_completed(future_to_repo):
+                    repo = future_to_repo[future]
+                    try:
+                        result = future.result()
+                        results.append(result)
+
+                        # Update progress description with current repo and status
+                        risk_emoji = {
+                            RiskLevel.CRITICAL: "🔴",
+                            RiskLevel.HIGH: "🟠",
+                            RiskLevel.MEDIUM: "🟡",
+                            RiskLevel.LOW: "🟢",
+                        }.get(result.risk_level, "⚪")
+
+                        progress.update(
+                            task,
+                            advance=1,
+                            description=f"[cyan]✓ {repo.name} {risk_emoji} ({result.score:.1f}/10)"
+                        )
+
+                    except Exception as e:
+                        logger.error(f"Unexpected error scanning {repo.full_name}: {e}")
+                        results.append(
+                            ScanResult(
+                                repo_name=repo.full_name,
+                                repo_url=repo.html_url,
+                                score=0.0,
+                                risk_level=RiskLevel.CRITICAL,
+                                scan_date=datetime.now(),
+                                error=str(e),
+                            )
+                        )
+                        progress.update(
+                            task,
+                            advance=1,
+                            description=f"[red]✗ {repo.name} (error)"
+                        )
 
         return results
 

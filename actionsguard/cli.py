@@ -210,25 +210,11 @@ def scan(
                 console.print(f"[dim]Only scanning: {', '.join(only_list)}[/dim]")
             console.print()
 
-            with Progress(
-                SpinnerColumn(),
-                TextColumn("[progress.description]{task.description}"),
-                BarColumn(),
-                TaskProgressColumn(),
-                console=console,
-            ) as progress:
-                task = progress.add_task(
-                    "[cyan]Scanning repositories...",
-                    total=None
-                )
-
-                summary = scanner.scan_organization(
-                    org_name=org,
-                    exclude=exclude_list if exclude_list else None,
-                    only=only_list if only_list else None,
-                )
-
-                progress.update(task, completed=True)
+            summary = scanner.scan_organization(
+                org_name=org,
+                exclude=exclude_list if exclude_list else None,
+                only=only_list if only_list else None,
+            )
         else:  # user
             exclude_list = exclude.split(",") if exclude else []
             only_list = only.split(",") if only else []
@@ -241,26 +227,12 @@ def scan(
                 console.print(f"[dim]Only scanning: {', '.join(only_list)}[/dim]")
             console.print()
 
-            with Progress(
-                SpinnerColumn(),
-                TextColumn("[progress.description]{task.description}"),
-                BarColumn(),
-                TaskProgressColumn(),
-                console=console,
-            ) as progress:
-                task = progress.add_task(
-                    "[cyan]Scanning repositories...",
-                    total=None
-                )
-
-                summary = scanner.scan_user(
-                    username=user,
-                    exclude=exclude_list if exclude_list else None,
-                    only=only_list if only_list else None,
-                    include_forks=include_forks,
-                )
-
-                progress.update(task, completed=True)
+            summary = scanner.scan_user(
+                username=user,
+                exclude=exclude_list if exclude_list else None,
+                only=only_list if only_list else None,
+                include_forks=include_forks,
+            )
 
         # Display summary
         _display_summary(summary)
