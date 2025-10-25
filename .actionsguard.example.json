@@ -21,6 +21,7 @@
   ],
   "fail_on_critical": false,
   "verbose": false,
+  "json_logs": false,
   "parallel_scans": 5,
   "scorecard_timeout": 300
 }

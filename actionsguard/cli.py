@@ -34,13 +34,19 @@ logger = None
     is_flag=True,
     help="Enable verbose logging"
 )
+@click.option(
+    "--json-logs",
+    is_flag=True,
+    help="Use structured JSON logging (for production/automation)"
+)
 @click.pass_context
-def cli(ctx, verbose):
+def cli(ctx, verbose, json_logs):
     """ActionsGuard - GitHub Actions Security Scanner."""
     global logger
-    logger = setup_logger(verbose=verbose)
+    logger = setup_logger(verbose=verbose, json_format=json_logs)
     ctx.ensure_object(dict)
     ctx.obj["verbose"] = verbose
+    ctx.obj["json_logs"] = json_logs
 
 
 @cli.command()

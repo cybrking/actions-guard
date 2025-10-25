@@ -26,6 +26,7 @@ class Config:
     )
     fail_on_critical: bool = False
     verbose: bool = False
+    json_logs: bool = False  # Use structured JSON logging
     parallel_scans: int = 5
     scorecard_timeout: int = 300  # 5 minutes
 
