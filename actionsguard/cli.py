@@ -1,5 +1,6 @@
 """Command-line interface for ActionsGuard."""
 
+import os
 import sys
 import logging
 import json
@@ -1100,6 +1101,112 @@ def debug(user: Optional[str], token: Optional[str]):
         import traceback
         console.print(traceback.format_exc())
         sys.exit(1)
+
+
+@cli.command()
+@click.option(
+    "--token",
+    "-t",
+    help="GitHub token to verify (or set GITHUB_TOKEN env var)"
+)
+@click.pass_context
+def health(ctx, token: Optional[str]):
+    """
+    Check system health and verify configuration.
+
+    Verifies:
+    - GitHub token is valid
+    - Scorecard binary is installed
+    - API connectivity
+    - Token permissions
+
+    Example:
+      actionsguard health
+      actionsguard health --token ghp_xxxx
+    """
+    console.print("\n[bold blue]🏥 ActionsGuard Health Check[/bold blue]\n")
+
+    checks_passed = 0
+    checks_failed = 0
+
+    # Check 1: Scorecard binary
+    console.print("[cyan]1. Checking Scorecard installation...[/cyan]")
+    try:
+        runner = ScorecardRunner()
+        version = runner.get_version()
+        console.print(f"   [green]✓[/green] Scorecard found: {version}\n")
+        checks_passed += 1
+    except Exception as e:
+        console.print(f"   [red]✗[/red] Scorecard not found: {e}")
+        console.print("   [yellow]Install Scorecard: https://github.com/ossf/scorecard#installation[/yellow]\n")
+        checks_failed += 1
+
+    # Check 2: GitHub Token
+    console.print("[cyan]2. Checking GitHub token...[/cyan]")
+
+    if token:
+        github_token = token
+    else:
+        github_token = os.getenv("GITHUB_TOKEN")
+
+    if not github_token:
+        console.print("   [red]✗[/red] No GitHub token found")
+        console.print("   [yellow]Set GITHUB_TOKEN environment variable or use --token flag[/yellow]\n")
+        checks_failed += 1
+    else:
+        console.print(f"   [green]✓[/green] Token found (length: {len(github_token)} characters)\n")
+        checks_passed += 1
+
+        # Check 3: Token validity and permissions
+        console.print("[cyan]3. Verifying token permissions...[/cyan]")
+        try:
+            from actionsguard.github_client import GitHubClient
+            client = GitHubClient(github_token)
+
+            # Get authenticated user
+            user = client.github.get_user()
+            console.print(f"   [green]✓[/green] Authenticated as: {user.login}")
+
+            # Check rate limit
+            rate_limit = client.github.get_rate_limit()
+            core = rate_limit.core
+            console.print(f"   [green]✓[/green] API Rate Limit: {core.remaining}/{core.limit} remaining")
+
+            if core.remaining < 100:
+                console.print(f"   [yellow]⚠[/yellow]  Low rate limit. Resets at {core.reset}\n")
+            else:
+                console.print()
+
+            checks_passed += 1
+
+            # Check 4: Repository access
+            console.print("[cyan]4. Testing repository access...[/cyan]")
+            try:
+                # Try to get user's repos (will fail if no repo scope)
+                repos = list(client.github.get_user().get_repos()[:1])
+                console.print(f"   [green]✓[/green] Can access repositories\n")
+                checks_passed += 1
+            except Exception as e:
+                console.print(f"   [red]✗[/red] Cannot access repositories: {e}")
+                console.print("   [yellow]Token may need 'repo' scope[/yellow]\n")
+                checks_failed += 1
+
+        except ValueError as e:
+            console.print(f"   [red]✗[/red] {e}\n")
+            checks_failed += 1
+        except Exception as e:
+            console.print(f"   [red]✗[/red] Token verification failed: {e}\n")
+            checks_failed += 1
+
+    # Summary
+    console.print("[bold]Summary:[/bold]")
+    console.print(f"  [green]✓[/green] {checks_passed} checks passed")
+    if checks_failed > 0:
+        console.print(f"  [red]✗[/red] {checks_failed} checks failed")
+        console.print("\n[yellow]⚠ System not ready for scanning[/yellow]")
+        sys.exit(1)
+    else:
+        console.print("\n[green]✅ System ready for scanning![/green]")
 
 
 if __name__ == "__main__":
