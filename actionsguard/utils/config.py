@@ -27,6 +27,8 @@ class Config:
     fail_on_critical: bool = False
     verbose: bool = False
     json_logs: bool = False  # Use structured JSON logging
+    use_cache: bool = True  # Use result caching
+    cache_ttl: int = 24  # Cache time-to-live in hours
     parallel_scans: int = 5
     scorecard_timeout: int = 300  # 5 minutes
 

@@ -22,6 +22,8 @@
   "fail_on_critical": false,
   "verbose": false,
   "json_logs": false,
+  "use_cache": true,
+  "cache_ttl": 24,
   "parallel_scans": 5,
   "scorecard_timeout": 300
 }

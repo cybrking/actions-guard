@@ -67,3 +67,6 @@ reports/
 
 # Logs
 *.log
+
+# Cache
+.actionsguard_cache/

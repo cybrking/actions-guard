@@ -35,6 +35,12 @@ verbose: false
 # Use structured JSON logging (recommended for production/automation)
 json_logs: false
 
+# Enable result caching to avoid re-scanning recently scanned repos
+use_cache: true
+
+# Cache time-to-live in hours (how long to keep cached results)
+cache_ttl: 24
+
 # Number of repositories to scan in parallel
 parallel_scans: 5
 

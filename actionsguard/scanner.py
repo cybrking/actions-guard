@@ -20,6 +20,7 @@ from rich.progress import (
 from actionsguard.github_client import GitHubClient
 from actionsguard.scorecard_runner import ScorecardRunner
 from actionsguard.workflow_analyzer import WorkflowAnalyzer
+from actionsguard.cache import ResultCache
 from actionsguard.models import ScanResult, ScanSummary, RiskLevel
 from actionsguard.utils.config import Config
 
@@ -44,6 +45,12 @@ class Scanner:
         self.workflow_analyzer = WorkflowAnalyzer()
         self.show_progress = show_progress
 
+        # Initialize cache if enabled
+        if config.use_cache:
+            self.cache = ResultCache(ttl_hours=config.cache_ttl)
+        else:
+            self.cache = None
+
     def scan_repository(self, repo: Repository) -> ScanResult:
         """
         Scan a single repository.
@@ -57,13 +64,21 @@ class Scanner:
         repo_name = repo.full_name
         repo_url = repo.html_url
 
+        # Check cache first if enabled
+        checks_to_run = self.config.checks if not self.config.all_checks else ["all"]
+        if self.cache:
+            cached_result = self.cache.get(repo_name, checks_to_run)
+            if cached_result:
+                logger.info(f"Using cached result for {repo_name}")
+                return cached_result
+
         logger.info(f"Scanning repository: {repo_name}")
 
         try:
             # Check if repo has workflows
             if not self.github_client.has_workflows(repo):
                 logger.warning(f"Repository {repo_name} has no GitHub Actions workflows")
-                return ScanResult(
+                result = ScanResult(
                     repo_name=repo_name,
                     repo_url=repo_url,
                     score=10.0,  # No workflows = no risk
@@ -72,12 +87,16 @@ class Scanner:
                     checks=[],
                     metadata={"has_workflows": False},
                 )
+                # Cache even no-workflow results
+                if self.cache:
+                    self.cache.set(repo_name, checks_to_run, result)
+                return result
 
             # Run scorecard
-            checks_to_run = None if self.config.all_checks else self.config.checks
+            scorecard_checks = None if self.config.all_checks else self.config.checks
             scorecard_data = self.scorecard_runner.run_scorecard(
                 repo_url=repo_url,
-                checks=checks_to_run,
+                checks=scorecard_checks,
                 github_token=self.config.github_token,
             )
 
@@ -108,11 +127,15 @@ class Scanner:
                 f"score={score:.1f}, risk={result.risk_level.value}"
             )
 
+            # Cache the result
+            if self.cache:
+                self.cache.set(repo_name, checks_to_run, result)
+
             return result
 
         except Exception as e:
             logger.error(f"Failed to scan {repo_name}: {str(e)}")
-            return ScanResult(
+            result = ScanResult(
                 repo_name=repo_name,
                 repo_url=repo_url,
                 score=0.0,
@@ -121,6 +144,8 @@ class Scanner:
                 checks=[],
                 error=str(e),
             )
+            # Don't cache errors
+            return result
 
     def scan_repositories(
         self,
