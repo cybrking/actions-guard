@@ -1,0 +1,26 @@
+{
+  "_comment": "ActionsGuard Configuration File Example",
+  "_usage": "Save as .actionsguard.json and use with: actionsguard scan --config .actionsguard.json",
+
+  "github_token": null,
+  "output_dir": "./reports",
+  "formats": [
+    "json",
+    "html",
+    "markdown"
+  ],
+  "checks": [
+    "Dangerous-Workflow",
+    "Token-Permissions",
+    "Pinned-Dependencies",
+    "Branch-Protection",
+    "Code-Review",
+    "Binary-Artifacts",
+    "SAST",
+    "Vulnerabilities"
+  ],
+  "fail_on_critical": false,
+  "verbose": false,
+  "parallel_scans": 5,
+  "scorecard_timeout": 300
+}

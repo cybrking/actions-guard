@@ -45,6 +45,11 @@ def cli(ctx, verbose):
 
 @cli.command()
 @click.option(
+    "--config",
+    type=click.Path(exists=True),
+    help="Path to configuration file (.yml, .yaml, or .json)"
+)
+@click.option(
     "--repo",
     "-r",
     help="Scan a single repository (format: owner/repo)"
@@ -115,6 +120,7 @@ def cli(ctx, verbose):
 @click.pass_context
 def scan(
     ctx,
+    config: Optional[str],
     repo: Optional[str],
     org: Optional[str],
     user: Optional[str],
@@ -162,24 +168,37 @@ def scan(
             sys.exit(2)
 
         # Build configuration
-        # Only pass github_token if explicitly provided via --token flag
-        # Otherwise, Config will read from GITHUB_TOKEN env var
-        config_kwargs = {
-            "output_dir": output,
-            "formats": formats.split(","),
-            "checks": checks.split(",") if checks else Config().checks,
-            "fail_on_critical": fail_on_critical,
-            "verbose": ctx.obj["verbose"],
-            "parallel_scans": parallel,
-        }
+        # Load from config file if provided, otherwise create default
+        if config:
+            try:
+                cfg = Config.from_file(config)
+                console.print(f"[dim]Loaded configuration from: {config}[/dim]\n")
+            except (FileNotFoundError, ValueError) as e:
+                console.print(f"[red]Error loading config file: {e}[/red]")
+                sys.exit(2)
+        else:
+            cfg = Config()
 
-        if token:
-            config_kwargs["github_token"] = token
+        # Override config file with CLI arguments (CLI takes precedence)
+        if output != "./reports":  # Not default
+            cfg.output_dir = output
+        if formats != "json,html,csv,markdown":  # Not default
+            cfg.formats = formats.split(",")
+        if checks:  # Explicitly provided
+            cfg.checks = checks.split(",")
+        if fail_on_critical:
+            cfg.fail_on_critical = fail_on_critical
+        if token:  # Explicitly provided via CLI
+            cfg.github_token = token
+        if parallel != 5:  # Not default
+            cfg.parallel_scans = parallel
 
-        config = Config(**config_kwargs)
+        cfg.verbose = ctx.obj["verbose"]
 
         if all_checks:
-            config.checks = ["all"]
+            cfg.checks = ["all"]
+
+        config = cfg
 
         # Validate token
         try:

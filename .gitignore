@@ -47,6 +47,7 @@ reports/
 *.html
 !actionsguard/templates/*.html
 *.json
+!.actionsguard.example.json
 *.csv
 *.md
 !README.md

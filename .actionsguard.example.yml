@@ -1,0 +1,39 @@
+# ActionsGuard Configuration File Example
+# Save as .actionsguard.yml and use with: actionsguard scan --config .actionsguard.yml
+
+# GitHub token (optional - can also use GITHUB_TOKEN environment variable)
+# For security, it's recommended to use the environment variable instead
+github_token: null
+
+# Output directory for scan reports
+output_dir: ./reports
+
+# Report formats to generate (available: json, html, csv, markdown)
+formats:
+  - json
+  - html
+  - markdown
+
+# Scorecard security checks to run
+# Use ["all"] to run all checks, or specify individual checks
+checks:
+  - Dangerous-Workflow
+  - Token-Permissions
+  - Pinned-Dependencies
+  - Branch-Protection
+  - Code-Review
+  - Binary-Artifacts
+  - SAST
+  - Vulnerabilities
+
+# Exit with error code if critical security issues are found
+fail_on_critical: false
+
+# Enable verbose logging
+verbose: false
+
+# Number of repositories to scan in parallel
+parallel_scans: 5
+
+# Scorecard execution timeout in seconds
+scorecard_timeout: 300
