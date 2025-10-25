@@ -42,28 +42,47 @@ class MarkdownReporter(BaseReporter):
         """
         output_path = self.output_dir / f"{filename}.md"
 
+        # Get executive summary
+        exec_summary = summary.get_executive_summary()
+
         with open(output_path, "w", encoding="utf-8") as f:
             # Title
-            f.write("# ActionsGuard Security Scan Report\n\n")
+            f.write("# 🛡️ ActionsGuard Security Report\n\n")
             f.write(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
 
             # Executive Summary
-            f.write("## Executive Summary\n\n")
-            f.write(f"- **Total Repositories:** {summary.total_repos}\n")
-            f.write(f"- **Successful Scans:** {summary.successful_scans}\n")
-            f.write(f"- **Failed Scans:** {summary.failed_scans}\n")
-            f.write(f"- **Average Score:** {summary.average_score:.1f}/10.0\n")
+            f.write("## 📊 Executive Summary\n\n")
+
+            # Metrics Grid
+            f.write("| Metric | Value |\n")
+            f.write("|--------|-------|\n")
+            f.write(f"| Total Repositories | {exec_summary['total_repositories']} ({summary.successful_scans} scanned successfully) |\n")
+            f.write(f"| Average Score | {exec_summary['average_score']:.1f}/10 |\n")
+            f.write(f"| Total Issues | {exec_summary['issue_counts']['total']} |\n")
             if summary.scan_duration:
-                f.write(f"- **Scan Duration:** {summary.scan_duration:.1f}s\n")
+                f.write(f"| Scan Duration | {summary.scan_duration:.1f}s |\n")
             f.write("\n")
 
-            # Issue Breakdown
-            f.write("### Issue Severity Breakdown\n\n")
-            f.write(f"- 🔴 **Critical:** {summary.critical_count}\n")
-            f.write(f"- 🟠 **High:** {summary.high_count}\n")
-            f.write(f"- 🟡 **Medium:** {summary.medium_count}\n")
-            f.write(f"- 🟢 **Low:** {summary.low_count}\n")
+            # Risk Distribution
+            f.write("### Risk Distribution\n\n")
+            risk_dist = exec_summary['risk_distribution']
+            f.write(f"- 🔴 **Critical:** {risk_dist['CRITICAL']} repositories\n")
+            f.write(f"- 🟠 **High:** {risk_dist['HIGH']} repositories\n")
+            f.write(f"- 🟡 **Medium:** {risk_dist['MEDIUM']} repositories\n")
+            f.write(f"- 🟢 **Low:** {risk_dist['LOW']} repositories\n")
             f.write("\n")
+
+            # Top Issues
+            if exec_summary.get('top_issues'):
+                f.write("### 🔍 Top Security Issues\n\n")
+                f.write("| Issue | Instances | Repos Affected |\n")
+                f.write("|-------|-----------|----------------|\n")
+                for issue in exec_summary['top_issues'][:5]:
+                    f.write(f"| {issue['name']} | {issue['instances']} | {issue['repos_affected']} |\n")
+                f.write("\n")
+
+            # Repository Details
+            f.write("## 📁 Repository Details\n\n")
 
             # Results by risk level
             critical_repos = [r for r in summary.results if r.risk_level == RiskLevel.CRITICAL and not r.error]
@@ -128,34 +147,54 @@ class MarkdownReporter(BaseReporter):
             f.write("*No GitHub Actions workflows detected*\n\n")
             return
 
-        # Failed checks
-        failed_checks = [c for c in result.checks if c.status == Status.FAIL]
-        if failed_checks:
-            f.write("#### ❌ Failed Checks\n\n")
-            for check in failed_checks:
-                severity_emoji = self._get_severity_emoji(check.severity)
-                f.write(f"- **{check.name}** {severity_emoji}\n")
-                f.write(f"  - Score: {check.score}/10\n")
-                f.write(f"  - Reason: {check.reason}\n")
-                if check.documentation_url:
-                    f.write(f"  - [Documentation]({check.documentation_url})\n")
-                f.write("\n")
+        # Workflow-level findings
+        if result.workflows:
+            f.write("#### 📁 Workflow Security Analysis\n\n")
+            for workflow in result.workflows:
+                f.write(f"##### `{workflow.path}` ({len(workflow.findings)} issue{'s' if len(workflow.findings) != 1 else ''})\n\n")
 
-        # Warning checks
-        warn_checks = [c for c in result.checks if c.status == Status.WARN]
-        if warn_checks and not collapsed:
-            f.write("#### ⚠️ Warning Checks\n\n")
-            for check in warn_checks:
-                f.write(f"- **{check.name}** (Score: {check.score}/10)\n")
-                f.write(f"  - {check.reason}\n\n")
+                for finding in workflow.findings:
+                    severity_emoji = self._get_severity_emoji(finding.severity)
+                    f.write(f"**{severity_emoji} {finding.check_name}** ({finding.severity.value})\n\n")
+                    f.write(f"{finding.message}\n\n")
 
-        # Passed checks (collapsed)
-        pass_checks = [c for c in result.checks if c.status == Status.PASS]
-        if pass_checks and not collapsed:
-            f.write("<details>\n<summary>✅ Passed Checks</summary>\n\n")
-            for check in pass_checks:
-                f.write(f"- {check.name} (Score: {check.score}/10)\n")
-            f.write("\n</details>\n\n")
+                    if finding.line_number:
+                        f.write(f"📍 **Line:** {finding.line_number}\n\n")
+
+                    if finding.recommendation:
+                        f.write(f"> 💡 **How to Fix:** {finding.recommendation}\n\n")
+
+                    f.write("---\n\n")
+        else:
+            # Fallback to check-based view if no workflow-level findings
+            # Failed checks
+            failed_checks = [c for c in result.checks if c.status == Status.FAIL]
+            if failed_checks:
+                f.write("#### ❌ Failed Checks\n\n")
+                for check in failed_checks:
+                    severity_emoji = self._get_severity_emoji(check.severity)
+                    f.write(f"- **{check.name}** {severity_emoji}\n")
+                    f.write(f"  - Score: {check.score}/10\n")
+                    f.write(f"  - Reason: {check.reason}\n")
+                    if check.documentation_url:
+                        f.write(f"  - [Documentation]({check.documentation_url})\n")
+                    f.write("\n")
+
+            # Warning checks
+            warn_checks = [c for c in result.checks if c.status == Status.WARN]
+            if warn_checks and not collapsed:
+                f.write("#### ⚠️ Warning Checks\n\n")
+                for check in warn_checks:
+                    f.write(f"- **{check.name}** (Score: {check.score}/10)\n")
+                    f.write(f"  - {check.reason}\n\n")
+
+            # Passed checks (collapsed)
+            pass_checks = [c for c in result.checks if c.status == Status.PASS]
+            if pass_checks and not collapsed:
+                f.write("<details>\n<summary>✅ Passed Checks</summary>\n\n")
+                for check in pass_checks:
+                    f.write(f"- {check.name} (Score: {check.score}/10)\n")
+                f.write("\n</details>\n\n")
 
         f.write("---\n\n")
 
