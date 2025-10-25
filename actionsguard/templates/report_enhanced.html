@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ActionsGuard Security Report - Enterprise Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        /* Executive Summary */
+        .exec-summary {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 40px;
+            border-left: 5px solid #667eea;
+        }
+
+        .exec-summary h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .metric-card .label {
+            font-size: 0.85em;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .metric-card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .metric-card .subvalue {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        /* Risk Distribution */
+        .risk-distribution {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .risk-badge {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .risk-badge.critical { background: #dc3545; }
+        .risk-badge.high { background: #fd7e14; }
+        .risk-badge.medium { background: #ffc107; color: #333; }
+        .risk-badge.low { background: #28a745; }
+
+        .risk-badge .count {
+            font-size: 2em;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .risk-badge .label {
+            font-size: 0.85em;
+            text-transform: uppercase;
+        }
+
+        /* Top Issues */
+        .top-issues {
+            margin: 30px 0;
+        }
+
+        .top-issues h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .issue-item {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .issue-item .issue-name {
+            font-weight: 600;
+            color: #2c3e50;
+            flex: 1;
+        }
+
+        .issue-item .issue-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9em;
+        }
+
+        .issue-item .stat {
+            color: #6c757d;
+        }
+
+        .issue-item .stat strong {
+            color: #2c3e50;
+        }
+
+        /* Repository Sections */
+        .repo-section {
+            margin: 40px 0;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .repo-header {
+            background: #f8f9fa;
+            padding: 20px 25px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .repo-header h3 {
+            margin: 0;
+            font-size: 1.4em;
+            color: #2c3e50;
+        }
+
+        .repo-header h3 a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .repo-header h3 a:hover {
+            text-decoration: underline;
+        }
+
+        .repo-risk {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+            color: white;
+        }
+
+        .repo-risk.CRITICAL { background: #dc3545; }
+        .repo-risk.HIGH { background: #fd7e14; }
+        .repo-risk.MEDIUM { background: #ffc107; color: #333; }
+        .repo-risk.LOW { background: #28a745; }
+
+        .repo-body {
+            padding: 25px;
+        }
+
+        .repo-score {
+            font-size: 3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        /* Workflow Sections */
+        .workflow {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .workflow-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .workflow-path {
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 1.1em;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .workflow-badge {
+            background: #6c757d;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+        }
+
+        /* Findings */
+        .finding {
+            background: white;
+            border-left: 4px solid #dc3545;
+            padding: 15px 20px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+
+        .finding.CRITICAL { border-left-color: #dc3545; }
+        .finding.HIGH { border-left-color: #fd7e14; }
+        .finding.MEDIUM { border-left-color: #ffc107; }
+        .finding.LOW { border-left-color: #28a745; }
+
+        .finding-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .finding-severity {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: white;
+        }
+
+        .finding-severity.CRITICAL { background: #dc3545; }
+        .finding-severity.HIGH { background: #fd7e14; }
+        .finding-severity.MEDIUM { background: #ffc107; color: #333; }
+        .finding-severity.LOW { background: #28a745; }
+
+        .finding-check {
+            font-weight: 600;
+            color: #2c3e50;
+            flex: 1;
+        }
+
+        .finding-message {
+            color: #495057;
+            margin: 10px 0;
+        }
+
+        .finding-line {
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 0.85em;
+            color: #6c757d;
+            margin: 8px 0;
+        }
+
+        .finding-recommendation {
+            background: #e7f3ff;
+            border-left: 3px solid #0066cc;
+            padding: 12px 15px;
+            margin-top: 12px;
+            border-radius: 4px;
+        }
+
+        .finding-recommendation strong {
+            color: #0066cc;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .finding-recommendation p {
+            color: #495057;
+            margin: 0;
+        }
+
+        /* No workflows message */
+        .no-workflows {
+            color: #6c757d;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Footer */
+        .footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; }
+            .repo-section { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ ActionsGuard Security Report</h1>
+            <div class="subtitle">Enterprise Security Analysis | Generated {{ generated_at }}</div>
+        </div>
+
+        <div class="content">
+            <!-- Executive Summary -->
+            <div class="exec-summary">
+                <h2>📊 Executive Summary</h2>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="label">Total Repositories</div>
+                        <div class="value">{{ exec_summary.total_repositories }}</div>
+                        <div class="subvalue">{{ exec_summary.successful_scans }} scanned successfully</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="label">Average Score</div>
+                        <div class="value">{{ "%.1f"|format(exec_summary.average_score) }}/10</div>
+                        <div class="subvalue">Organization-wide</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="label">Total Issues</div>
+                        <div class="value">{{ exec_summary.issue_counts.total }}</div>
+                        <div class="subvalue">Across all repositories</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="label">Scan Duration</div>
+                        <div class="value">{{ "%.1f"|format(exec_summary.scan_duration or 0) }}s</div>
+                        <div class="subvalue">Total time</div>
+                    </div>
+                </div>
+
+                <h3 style="color: #2c3e50; margin: 25px 0 15px 0;">Risk Distribution</h3>
+                <div class="risk-distribution">
+                    <div class="risk-badge critical">
+                        <span class="count">{{ exec_summary.risk_distribution.CRITICAL }}</span>
+                        <span class="label">Critical</span>
+                    </div>
+                    <div class="risk-badge high">
+                        <span class="count">{{ exec_summary.risk_distribution.HIGH }}</span>
+                        <span class="label">High</span>
+                    </div>
+                    <div class="risk-badge medium">
+                        <span class="count">{{ exec_summary.risk_distribution.MEDIUM }}</span>
+                        <span class="label">Medium</span>
+                    </div>
+                    <div class="risk-badge low">
+                        <span class="count">{{ exec_summary.risk_distribution.LOW }}</span>
+                        <span class="label">Low</span>
+                    </div>
+                </div>
+
+                {% if exec_summary.top_issues %}
+                <div class="top-issues">
+                    <h3>🔍 Top Security Issues</h3>
+                    {% for issue in exec_summary.top_issues[:5] %}
+                    <div class="issue-item">
+                        <div class="issue-name">{{ issue.name }}</div>
+                        <div class="issue-stats">
+                            <span class="stat"><strong>{{ issue.instances }}</strong> instances</span>
+                            <span class="stat"><strong>{{ issue.repos_affected }}</strong> repos affected</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Repository Details -->
+            <h2 style="color: #2c3e50; margin: 40px 0 25px 0; font-size: 1.8em;">📁 Repository Details</h2>
+
+            {% for result in summary.results if not result.error %}
+            <div class="repo-section">
+                <div class="repo-header">
+                    <h3><a href="{{ result.repo_url }}" target="_blank">{{ result.repo_name }}</a></h3>
+                    <span class="repo-risk {{ result.risk_level.value }}">{{ result.risk_level.value }}</span>
+                </div>
+                <div class="repo-body">
+                    <div class="repo-score">Score: {{ "%.1f"|format(result.score) }}/10</div>
+
+                    {% if result.workflows %}
+                        <h4 style="color: #2c3e50; margin: 25px 0 15px 0;">Workflow Security Analysis</h4>
+                        {% for workflow in result.workflows %}
+                        <div class="workflow">
+                            <div class="workflow-header">
+                                <div class="workflow-path">{{ workflow.path }}</div>
+                                <span class="workflow-badge">{{ workflow.findings|length }} issue(s)</span>
+                            </div>
+
+                            {% for finding in workflow.findings %}
+                            <div class="finding {{ finding.severity }}">
+                                <div class="finding-header">
+                                    <div class="finding-check">{{ finding.check_name }}</div>
+                                    <span class="finding-severity {{ finding.severity }}">{{ finding.severity }}</span>
+                                </div>
+
+                                <div class="finding-message">{{ finding.message }}</div>
+
+                                {% if finding.line_number %}
+                                <div class="finding-line">📍 Line {{ finding.line_number }}</div>
+                                {% endif %}
+
+                                {% if finding.recommendation %}
+                                <div class="finding-recommendation">
+                                    <strong>💡 How to Fix:</strong>
+                                    <p>{{ finding.recommendation }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-workflows">
+                            {% if result.metadata.has_workflows == false %}
+                            No GitHub Actions workflows found in this repository.
+                            {% else %}
+                            No security issues detected in workflows.
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+            {% if error_repos %}
+            <h2 style="color: #dc3545; margin: 40px 0 25px 0;">⚠️ Scan Errors</h2>
+            {% for result in error_repos %}
+            <div class="repo-section">
+                <div class="repo-header">
+                    <h3>{{ result.repo_name }}</h3>
+                    <span class="repo-risk CRITICAL">ERROR</span>
+                </div>
+                <div class="repo-body">
+                    <p style="color: #dc3545;">{{ result.error }}</p>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+
+        <div class="footer">
+            Generated by <a href="https://github.com/cybrking/actions-guard" target="_blank">ActionsGuard</a> |
+            Powered by <a href="https://github.com/ossf/scorecard" target="_blank">OpenSSF Scorecard</a>
+        </div>
+    </div>
+</body>
+</html>

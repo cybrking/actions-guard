@@ -68,7 +68,7 @@ class HTMLReporter(BaseReporter):
         }
 
         # Render template
-        template = self.env.get_template("report.html")
+        template = self.env.get_template("report_enhanced.html")
         html_content = template.render(**template_data)
 
         # Write to file

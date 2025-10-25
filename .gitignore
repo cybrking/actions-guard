@@ -45,6 +45,7 @@ htmlcov/
 # Reports
 reports/
 *.html
+!actionsguard/templates/*.html
 *.json
 *.csv
 *.md
