@@ -1,0 +1,469 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.14, pytest-8.4.2, pluggy-1.6.0 -- /usr/local/bin/python
+cachedir: .pytest_cache
+rootdir: /home/user/actions-guard
+configfile: pyproject.toml
+plugins: cov-7.0.0, mock-3.15.1
+collecting ... collected 148 items
+
+tests/test_cache.py::test_cache_initialization PASSED                    [  0%]
+tests/test_cache.py::test_cache_key_generation PASSED                    [  1%]
+tests/test_cache.py::test_cache_set_and_get PASSED                       [  2%]
+tests/test_cache.py::test_cache_expiration PASSED                        [  2%]
+tests/test_cache.py::test_cache_with_different_checks PASSED             [  3%]
+tests/test_cache.py::test_cache_clear_specific_repo PASSED               [  4%]
+tests/test_cache.py::test_cache_clear_all PASSED                         [  4%]
+tests/test_cache.py::test_cache_stats PASSED                             [  5%]
+tests/test_cache.py::test_cache_corrupted_file PASSED                    [  6%]
+tests/test_cache.py::test_cache_with_workflow_findings PASSED            [  6%]
+tests/test_cli.py::test_cli_version PASSED                               [  7%]
+tests/test_cli.py::test_cli_help PASSED                                  [  8%]
+tests/test_cli.py::test_scan_help PASSED                                 [  8%]
+tests/test_cli.py::test_scan_missing_arguments PASSED                    [  9%]
+tests/test_cli.py::test_scan_both_repo_and_org PASSED                    [ 10%]
+tests/test_config.py::test_config_defaults PASSED                        [ 10%]
+tests/test_config.py::test_config_with_custom_values PASSED              [ 11%]
+tests/test_config.py::test_config_all_checks_property PASSED             [ 12%]
+tests/test_config.py::test_config_validate_with_token PASSED             [ 12%]
+tests/test_config.py::test_config_validate_without_token PASSED          [ 13%]
+tests/test_config.py::test_config_from_yaml_file PASSED                  [ 14%]
+tests/test_config.py::test_config_from_json_file PASSED                  [ 14%]
+tests/test_config.py::test_config_from_file_not_found PASSED             [ 15%]
+tests/test_config.py::test_config_from_file_invalid_format PASSED        [ 16%]
+tests/test_config.py::test_config_from_file_invalid_yaml PASSED          [ 16%]
+tests/test_config.py::test_config_from_file_invalid_json PASSED          [ 17%]
+tests/test_config.py::test_config_from_file_env_var_precedence PASSED    [ 18%]
+tests/test_config.py::test_config_to_dict PASSED                         [ 18%]
+tests/test_config.py::test_config_from_dict PASSED                       [ 19%]
+tests/test_config.py::test_config_to_file_yaml PASSED                    [ 20%]
+tests/test_config.py::test_config_to_file_json PASSED                    [ 20%]
+tests/test_github_client.py::test_client_initialization PASSED           [ 21%]
+tests/test_github_client.py::test_client_invalid_token PASSED            [ 22%]
+tests/test_github_client.py::test_retry_decorator_success PASSED         [ 22%]
+tests/test_github_client.py::test_retry_decorator_with_rate_limit PASSED [ 23%]
+tests/test_github_client.py::test_retry_decorator_max_retries_exceeded PASSED [ 24%]
+tests/test_github_client.py::test_retry_decorator_server_error PASSED    [ 25%]
+tests/test_github_client.py::test_retry_decorator_client_error_no_retry PASSED [ 25%]
+tests/test_github_client.py::test_retry_decorator_network_error PASSED   [ 26%]
+tests/test_github_client.py::test_has_workflows_true PASSED              [ 27%]
+tests/test_github_client.py::test_has_workflows_false PASSED             [ 27%]
+tests/test_github_client.py::test_get_repository PASSED                  [ 28%]
+tests/test_github_client.py::test_get_repository_not_found PASSED        [ 29%]
+tests/test_github_client.py::test_check_rate_limit PASSED                [ 29%]
+tests/test_github_client.py::test_check_rate_limit_low_warning FAILED    [ 30%]
+tests/test_github_client.py::test_get_user_repos PASSED                  [ 31%]
+tests/test_github_client.py::test_get_user_repos_include_forks PASSED    [ 31%]
+tests/test_github_client.py::test_get_user_repos_with_filters PASSED     [ 32%]
+tests/test_models.py::test_check_result_creation PASSED                  [ 33%]
+tests/test_models.py::test_check_result_to_dict PASSED                   [ 33%]
+tests/test_models.py::test_severity_calculation PASSED                   [ 34%]
+tests/test_models.py::test_scan_result_creation PASSED                   [ 35%]
+tests/test_models.py::test_risk_level_calculation PASSED                 [ 35%]
+tests/test_models.py::test_scan_result_has_critical_issues PASSED        [ 36%]
+tests/test_models.py::test_scan_summary_from_results PASSED              [ 37%]
+tests/test_reporters.py::test_json_reporter_initialization PASSED        [ 37%]
+tests/test_reporters.py::test_json_reporter_get_extension PASSED         [ 38%]
+tests/test_reporters.py::test_json_reporter_generate_report FAILED       [ 39%]
+tests/test_reporters.py::test_json_reporter_default_filename PASSED      [ 39%]
+tests/test_reporters.py::test_json_reporter_creates_directory PASSED     [ 40%]
+tests/test_reporters.py::test_html_reporter_initialization PASSED        [ 41%]
+tests/test_reporters.py::test_html_reporter_get_extension PASSED         [ 41%]
+tests/test_reporters.py::test_html_reporter_generate_report PASSED       [ 42%]
+tests/test_reporters.py::test_html_reporter_executive_summary FAILED     [ 43%]
+tests/test_reporters.py::test_csv_reporter_initialization PASSED         [ 43%]
+tests/test_reporters.py::test_csv_reporter_get_extension PASSED          [ 44%]
+tests/test_reporters.py::test_csv_reporter_generate_report PASSED        [ 45%]
+tests/test_reporters.py::test_markdown_reporter_initialization PASSED    [ 45%]
+tests/test_reporters.py::test_markdown_reporter_get_extension PASSED     [ 46%]
+tests/test_reporters.py::test_markdown_reporter_generate_report FAILED   [ 47%]
+tests/test_reporters.py::test_markdown_reporter_contains_executive_summary PASSED [ 47%]
+tests/test_reporters.py::test_all_reporters_generate_successfully PASSED [ 48%]
+tests/test_reporters.py::test_reporters_handle_empty_results PASSED      [ 49%]
+tests/test_reporters.py::test_json_reporter_unicode_handling PASSED      [ 50%]
+tests/test_scanner.py::test_scanner_initialization PASSED                [ 50%]
+tests/test_scanner.py::test_scanner_initialization_with_cache PASSED     [ 51%]
+tests/test_scanner.py::test_scan_repository_with_cache_hit PASSED        [ 52%]
+tests/test_scanner.py::test_scan_repository_no_workflows PASSED          [ 52%]
+tests/test_scanner.py::test_scan_repository_successful PASSED            [ 53%]
+tests/test_scanner.py::test_scan_repository_with_error PASSED            [ 54%]
+tests/test_scanner.py::test_scan_repositories_empty_list PASSED          [ 54%]
+tests/test_scanner.py::test_scan_repositories_sequential PASSED          [ 55%]
+tests/test_scanner.py::test_scan_repositories_parallel PASSED            [ 56%]
+tests/test_scanner.py::test_scan_repositories_parallel_with_progress FAILED [ 56%]
+tests/test_scanner.py::test_scan_repositories_parallel_with_exception PASSED [ 57%]
+tests/test_scanner.py::test_scan_organization_no_repos PASSED            [ 58%]
+tests/test_scanner.py::test_scan_organization_successful PASSED          [ 58%]
+tests/test_scanner.py::test_scan_user_no_repos PASSED                    [ 59%]
+tests/test_scanner.py::test_scan_user_successful PASSED                  [ 60%]
+tests/test_scanner.py::test_scan_user_authenticated_user PASSED          [ 60%]
+tests/test_scanner.py::test_scan_single_repository PASSED                [ 61%]
+tests/test_scanner.py::test_scan_summary_from_results FAILED             [ 62%]
+tests/test_scanner.py::test_scan_repository_caches_result PASSED         [ 62%]
+tests/test_scanner.py::test_scan_repository_no_cache_on_error PASSED     [ 63%]
+tests/test_scorecard_runner.py::test_runner_initialization_no_check PASSED [ 64%]
+tests/test_scorecard_runner.py::test_runner_initialization_with_check PASSED [ 64%]
+tests/test_scorecard_runner.py::test_runner_initialization_not_installed PASSED [ 65%]
+tests/test_scorecard_runner.py::test_run_scorecard_successful PASSED     [ 66%]
+tests/test_scorecard_runner.py::test_run_scorecard_all_checks PASSED     [ 66%]
+tests/test_scorecard_runner.py::test_run_scorecard_without_token PASSED  [ 67%]
+tests/test_scorecard_runner.py::test_run_scorecard_execution_failure PASSED [ 68%]
+tests/test_scorecard_runner.py::test_run_scorecard_timeout PASSED        [ 68%]
+tests/test_scorecard_runner.py::test_run_scorecard_invalid_json PASSED   [ 69%]
+tests/test_scorecard_runner.py::test_parse_results FAILED                [ 70%]
+tests/test_scorecard_runner.py::test_parse_results_score_mapping PASSED  [ 70%]
+tests/test_scorecard_runner.py::test_parse_results_severity_calculation FAILED [ 71%]
+tests/test_scorecard_runner.py::test_parse_results_with_details PASSED   [ 72%]
+tests/test_scorecard_runner.py::test_get_overall_score PASSED            [ 72%]
+tests/test_scorecard_runner.py::test_get_overall_score_missing PASSED    [ 73%]
+tests/test_scorecard_runner.py::test_get_overall_score_as_int PASSED     [ 74%]
+tests/test_scorecard_runner.py::test_get_metadata PASSED                 [ 75%]
+tests/test_scorecard_runner.py::test_get_metadata_missing_fields PASSED  [ 75%]
+tests/test_scorecard_runner.py::test_get_metadata_partial_data PASSED    [ 76%]
+tests/test_scorecard_runner.py::test_parse_results_empty_checks PASSED   [ 77%]
+tests/test_scorecard_runner.py::test_parse_results_missing_optional_fields PASSED [ 77%]
+tests/test_scorecard_runner.py::test_run_scorecard_command_construction PASSED [ 78%]
+tests/test_scorecard_runner.py::test_runner_timeout_parameter PASSED     [ 79%]
+tests/test_scorecard_runner.py::test_custom_timeout PASSED               [ 79%]
+tests/test_workflow_analyzer.py::test_analyzer_initialization PASSED     [ 80%]
+tests/test_workflow_analyzer.py::test_analyze_scorecard_results_empty_data PASSED [ 81%]
+tests/test_workflow_analyzer.py::test_analyze_scorecard_results_empty_checks PASSED [ 81%]
+tests/test_workflow_analyzer.py::test_analyze_scorecard_results_no_checks_in_data PASSED [ 82%]
+tests/test_workflow_analyzer.py::test_analyze_scorecard_results_successful PASSED [ 83%]
+tests/test_workflow_analyzer.py::test_analyze_scorecard_results_with_line_numbers PASSED [ 83%]
+tests/test_workflow_analyzer.py::test_analyze_scorecard_results_with_snippets PASSED [ 84%]
+tests/test_workflow_analyzer.py::test_analyze_scorecard_results_workflow_sorting PASSED [ 85%]
+tests/test_workflow_analyzer.py::test_extract_workflow_path_from_path_field PASSED [ 85%]
+tests/test_workflow_analyzer.py::test_extract_workflow_path_from_message PASSED [ 86%]
+tests/test_workflow_analyzer.py::test_extract_workflow_path_yml_extension PASSED [ 87%]
+tests/test_workflow_analyzer.py::test_extract_workflow_path_yaml_extension PASSED [ 87%]
+tests/test_workflow_analyzer.py::test_extract_workflow_path_not_found PASSED [ 88%]
+tests/test_workflow_analyzer.py::test_extract_line_number_from_line_field PASSED [ 89%]
+tests/test_workflow_analyzer.py::test_extract_line_number_from_offset_field PASSED [ 89%]
+tests/test_workflow_analyzer.py::test_extract_line_number_not_found PASSED [ 90%]
+tests/test_workflow_analyzer.py::test_extract_snippet PASSED             [ 91%]
+tests/test_workflow_analyzer.py::test_extract_snippet_not_found PASSED   [ 91%]
+tests/test_workflow_analyzer.py::test_get_recommendation_dangerous_workflow_pull_request_target PASSED [ 92%]
+tests/test_workflow_analyzer.py::test_get_recommendation_dangerous_workflow_injection PASSED [ 93%]
+tests/test_workflow_analyzer.py::test_get_recommendation_dangerous_workflow_generic PASSED [ 93%]
+tests/test_workflow_analyzer.py::test_get_recommendation_token_permissions_write_all PASSED [ 94%]
+tests/test_workflow_analyzer.py::test_get_recommendation_token_permissions_write PASSED [ 95%]
+tests/test_workflow_analyzer.py::test_get_recommendation_pinned_dependencies_with_action PASSED [ 95%]
+tests/test_workflow_analyzer.py::test_get_recommendation_pinned_dependencies_generic PASSED [ 96%]
+tests/test_workflow_analyzer.py::test_get_recommendation_unknown_check PASSED [ 97%]
+tests/test_workflow_analyzer.py::test_analyze_with_non_iterable_details PASSED [ 97%]
+tests/test_workflow_analyzer.py::test_analyze_with_none_details PASSED   [ 98%]
+tests/test_workflow_analyzer.py::test_analyze_with_invalid_detail_items PASSED [ 99%]
+tests/test_workflow_analyzer.py::test_workflow_analysis_severity_counts PASSED [100%]
+
+=================================== FAILURES ===================================
+______________________ test_check_rate_limit_low_warning _______________________
+
+mock_github_client = <actionsguard.github_client.GitHubClient object at 0x7ea860f01050>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x7ea860f03050>
+
+    def test_check_rate_limit_low_warning(mock_github_client, caplog):
+        """Test rate limit warning when low."""
+        import logging
+        caplog.set_level(logging.WARNING)
+    
+        mock_rate_limit = Mock()
+        mock_rate_limit.core.remaining = 50  # Low
+        mock_rate_limit.core.limit = 5000
+        mock_rate_limit.core.reset = Mock()
+    
+        mock_github_client.github.get_rate_limit.return_value = mock_rate_limit
+    
+        mock_github_client.check_rate_limit()
+    
+        # Should log warning
+>       assert "Low rate limit" in caplog.text
+E       AssertionError: assert 'Low rate limit' in ''
+E        +  where '' = <_pytest.logging.LogCaptureFixture object at 0x7ea860f03050>.text
+
+tests/test_github_client.py:253: AssertionError
+----------------------------- Captured stderr call -----------------------------
+           WARNING  Low rate limit: 50 requests remaining.  github_client.py:352
+                    Resets at <Mock                                             
+                    name='Github().get_rate_limit().core.re                     
+                    set' id='139261648459280'>                                  
+______________________ test_json_reporter_generate_report ______________________
+
+temp_output_dir = '/tmp/tmpfsmi8yd7'
+sample_summary = ScanSummary(total_repos=4, successful_scans=3, failed_scans=1, average_score=5.83, critical_count=1, high_count=0, med...e(2024, 1, 15, 10, 45), checks=[], workflows=[], metadata={}, error='Failed to scan: API error')], scan_duration=120.5)
+
+    def test_json_reporter_generate_report(temp_output_dir, sample_summary):
+        """Test JSON report generation."""
+        reporter = JSONReporter(temp_output_dir)
+        output_path = reporter.generate_report(sample_summary, filename="test_report")
+    
+        assert output_path.exists()
+        assert output_path.name == "test_report.json"
+    
+        # Validate JSON structure
+        with open(output_path, 'r') as f:
+            report_data = json.load(f)
+    
+        assert report_data["schema_version"] == JSONReporter.SCHEMA_VERSION
+        assert report_data["tool"] == "ActionsGuard"
+        assert report_data["report_type"] == "security_scan"
+        assert "generated_at" in report_data
+        assert "summary" in report_data
+    
+        # Validate summary data
+        summary_data = report_data["summary"]
+        assert summary_data["total_repos"] == 4
+        assert summary_data["successful_scans"] == 3
+        assert summary_data["failed_scans"] == 1
+>       assert summary_data["critical_count"] == 2
+E       assert 1 == 2
+
+tests/test_reporters.py:137: AssertionError
+----------------------------- Captured stderr call -----------------------------
+           INFO     Generated JSON report:                   json_reporter.py:45
+                    /tmp/tmpfsmi8yd7/test_report.json                           
+_____________________ test_html_reporter_executive_summary _____________________
+
+temp_output_dir = '/tmp/tmpaxt5c5l_'
+sample_summary = ScanSummary(total_repos=4, successful_scans=3, failed_scans=1, average_score=5.83, critical_count=1, high_count=0, med...e(2024, 1, 15, 10, 45), checks=[], workflows=[], metadata={}, error='Failed to scan: API error')], scan_duration=120.5)
+
+    def test_html_reporter_executive_summary(temp_output_dir, sample_summary):
+        """Test HTML reporter includes executive summary."""
+        mock_template = Mock()
+        mock_template.render.return_value = "<html></html>"
+    
+        mock_env = Mock()
+        mock_env.get_template.return_value = mock_template
+    
+        with patch('actionsguard.reporters.html_reporter.Environment', return_value=mock_env):
+            reporter = HTMLReporter(temp_output_dir)
+            reporter.generate_report(sample_summary)
+    
+            template_data = mock_template.render.call_args[1]
+            exec_summary = template_data["exec_summary"]
+    
+            # Executive summary should have key information
+>           assert "total_repos" in exec_summary
+E           AssertionError: assert 'total_repos' in {'total_repositories': 4, 'successful_scans': 3, 'failed_scans': 1, 'average_score': 5.83, 'scan_duration': 120.5, 'risk_distribution': {'CRITICAL': 1, 'HIGH': 0, 'MEDIUM': 1, 'LOW': 1}, 'issue_counts': {'critical': 1, 'high': 0, 'medium': 1, 'low': 1, 'total': 3}, 'top_issues': [{'name': 'Dangerous-Workflow', 'instances': 1, 'repos_affected': 1, 'severity': 'CRITICAL'}, {'name': 'Token-Permissions', 'instances': 1, 'repos_affected': 1, 'severity': 'MEDIUM'}]}
+
+tests/test_reporters.py:229: AssertionError
+----------------------------- Captured stderr call -----------------------------
+           INFO     Generated HTML report:                   html_reporter.py:78
+                    /tmp/tmpaxt5c5l_/report.html                                
+____________________ test_markdown_reporter_generate_report ____________________
+
+temp_output_dir = '/tmp/tmp2hbw2kuh'
+sample_summary = ScanSummary(total_repos=4, successful_scans=3, failed_scans=1, average_score=5.83, critical_count=1, high_count=0, med...e(2024, 1, 15, 10, 45), checks=[], workflows=[], metadata={}, error='Failed to scan: API error')], scan_duration=120.5)
+
+    def test_markdown_reporter_generate_report(temp_output_dir, sample_summary):
+        """Test Markdown report generation."""
+        from actionsguard.reporters.markdown_reporter import MarkdownReporter
+    
+        reporter = MarkdownReporter(temp_output_dir)
+        output_path = reporter.generate_report(sample_summary, filename="test_report")
+    
+        assert output_path.exists()
+        assert output_path.name == "test_report.md"
+    
+        # Read and validate markdown
+        with open(output_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+    
+        # Validate structure
+>       assert "# ActionsGuard Security Scan Report" in content or "Security Scan" in content
+E       AssertionError: assert ('# ActionsGuard Security Scan Report' in '# \U0001f6e1\ufe0f ActionsGuard Security Report\n\n**Generated:** 2025-10-26 00:06:43\n\n## \U0001f4ca Executive Summary\n\n| Metric | Value |\n|--------|-------|\n| Total Repositories | 4 (3 scanned successfully) |\n| Average Score | 5.8/10 |\n| Total Issues | 3 |\n| Scan Duration | 120.5s |\n\n### Risk Distribution\n\n- \U0001f534 **Critical:** 1 repositories\n- \U0001f7e0 **High:** 0 repositories\n- \U0001f7e1 **Medium:** 1 repositories\n- \U0001f7e2 **Low:** 1 repositories\n\n### \U0001f50d Top Security Issues\n\n| Issue | Instances | Repos Affected |\n|-------|-----------|----------------|\n| Dangerous-Workflow | 1 | 1 |\n| Token-Permissions | 1 | 1 |\n\n## \U0001f4c1 Repository Details\n\n### \U0001f534 Critical Risk Repositories\n\n### \U0001f534 [owner/critical-repo](https://github.com/owner/critical-repo)\n\n**Score:** 2.0/10.0 | **Risk:** CRITICAL\n\n#### \u274c Security Issues Detected\n\n**\U0001f534 Dangerous-Workflow** (CRITICAL)\n\nScore: 0/10 - Dangerous patterns found\n\n> \U0001f4da **Documentation:** [https://example.com/dangerous](https://example.com/dangerous)\n\n---\n\n---\n\n### \U0001f7e1 Medium Risk Repositories\n\n### \U0001f7e1 [owner/medium-repo](https://github.com/owner/medium-repo)\n\n**Score:** 6.5/10.0 | **Risk:** MEDIUM\n\n#### \u26a0\ufe0f Warnings\n\n**\U0001f7e1 Token-Permissions** (MEDIUM)\n\nScore: 5/10 - Some permissions issues\n\n> \U0001f4da **Documentation:** [https://example.com/permissions](https://example.com/permissions)\n\n---\n\n---\n\n### \U0001f7e2 Low Risk Repositories\n\n### \U0001f7e2 [owner/low-repo](https://github.com/owner/low-repo)\n\n**Score:** 9.0/10.0 | **Risk:** LOW\n\n\u2705 All security checks passed.\n\n---\n\n## \U0001f4a5 Failed Scans\n\n### [owner/error-repo](https://github.com/owner/error-repo)\n\n**Error:** Failed to scan: API error\n\n---\n\n*Generated by [ActionsGuard](https://github.com/your-username/actionsguard)*\n' or 'Security Scan' in '# \U0001f6e1\ufe0f ActionsGuard Security Report\n\n**Generated:** 2025-10-26 00:06:43\n\n## \U0001f4ca Executive Summary\n\n| Metric | Value |\n|--------|-------|\n| Total Repositories | 4 (3 scanned successfully) |\n| Average Score | 5.8/10 |\n| Total Issues | 3 |\n| Scan Duration | 120.5s |\n\n### Risk Distribution\n\n- \U0001f534 **Critical:** 1 repositories\n- \U0001f7e0 **High:** 0 repositories\n- \U0001f7e1 **Medium:** 1 repositories\n- \U0001f7e2 **Low:** 1 repositories\n\n### \U0001f50d Top Security Issues\n\n| Issue | Instances | Repos Affected |\n|-------|-----------|----------------|\n| Dangerous-Workflow | 1 | 1 |\n| Token-Permissions | 1 | 1 |\n\n## \U0001f4c1 Repository Details\n\n### \U0001f534 Critical Risk Repositories\n\n### \U0001f534 [owner/critical-repo](https://github.com/owner/critical-repo)\n\n**Score:** 2.0/10.0 | **Risk:** CRITICAL\n\n#### \u274c Security Issues Detected\n\n**\U0001f534 Dangerous-Workflow** (CRITICAL)\n\nScore: 0/10 - Dangerous patterns found\n\n> \U0001f4da **Documentation:** [https://example.com/dangerous](https://example.com/dangerous)\n\n---\n\n---\n\n### \U0001f7e1 Medium Risk Repositories\n\n### \U0001f7e1 [owner/medium-repo](https://github.com/owner/medium-repo)\n\n**Score:** 6.5/10.0 | **Risk:** MEDIUM\n\n#### \u26a0\ufe0f Warnings\n\n**\U0001f7e1 Token-Permissions** (MEDIUM)\n\nScore: 5/10 - Some permissions issues\n\n> \U0001f4da **Documentation:** [https://example.com/permissions](https://example.com/permissions)\n\n---\n\n---\n\n### \U0001f7e2 Low Risk Repositories\n\n### \U0001f7e2 [owner/low-repo](https://github.com/owner/low-repo)\n\n**Score:** 9.0/10.0 | **Risk:** LOW\n\n\u2705 All security checks passed.\n\n---\n\n## \U0001f4a5 Failed Scans\n\n### [owner/error-repo](https://github.com/owner/error-repo)\n\n**Error:** Failed to scan: API error\n\n---\n\n*Generated by [ActionsGuard](https://github.com/your-username/actionsguard)*\n')
+
+tests/test_reporters.py:314: AssertionError
+----------------------------- Captured stderr call -----------------------------
+           INFO     Generated Markdown report:          markdown_reporter.py:129
+                    /tmp/tmp2hbw2kuh/test_report.md                             
+________________ test_scan_repositories_parallel_with_progress _________________
+
+self = <MagicMock name='Progress' id='139261648998096'>
+
+    def assert_called_once(self):
+        """assert that the mock was called only once.
+        """
+        if not self.call_count == 1:
+            msg = ("Expected '%s' to have been called once. Called %s times.%s"
+                   % (self._mock_name or 'mock',
+                      self.call_count,
+                      self._calls_repr()))
+>           raise AssertionError(msg)
+E           AssertionError: Expected 'Progress' to have been called once. Called 0 times.
+
+/usr/lib/python3.11/unittest/mock.py:918: AssertionError
+
+During handling of the above exception, another exception occurred:
+
+mock_config = Config(github_token='ghp_test_token', output_dir='./test-reports', formats=['json', 'html', 'csv', 'markdown'], checks...critical=False, verbose=False, json_logs=False, use_cache=False, cache_ttl=24, parallel_scans=2, scorecard_timeout=300)
+mock_repo = <Mock id='139261646798416'>
+
+    def test_scan_repositories_parallel_with_progress(mock_config, mock_repo):
+        """Test scanning with progress bar enabled."""
+        with patch('actionsguard.scanner.GitHubClient'), \
+             patch('actionsguard.scanner.ScorecardRunner'), \
+             patch('actionsguard.scanner.WorkflowAnalyzer'), \
+             patch('actionsguard.scanner.Progress') as mock_progress:
+    
+            # Setup progress mock
+            mock_progress_instance = MagicMock()
+            mock_progress.return_value.__enter__.return_value = mock_progress_instance
+    
+            scanner = Scanner(mock_config, show_progress=True)
+            scanner.github_client.has_workflows.return_value = False
+    
+            repos = [mock_repo]
+            results = scanner.scan_repositories(repos, parallel=True)
+    
+            assert len(results) == 1
+            # Verify progress bar was used
+>           mock_progress.assert_called_once()
+E           AssertionError: Expected 'Progress' to have been called once. Called 0 times.
+
+tests/test_scanner.py:264: AssertionError
+----------------------------- Captured stderr call -----------------------------
+           INFO     Starting scan of 1 repositories               scanner.py:169
+           INFO     Scanning repository: owner/test-repo           scanner.py:75
+           WARNING  Repository owner/test-repo has no GitHub       scanner.py:80
+                    Actions workflows                                           
+           INFO     Completed scanning 1 repositories in 0.0s     scanner.py:178
+________________________ test_scan_summary_from_results ________________________
+
+    def test_scan_summary_from_results():
+        """Test ScanSummary.from_results creation."""
+        results = [
+            ScanResult(
+                repo_name="repo1",
+                repo_url="https://github.com/owner/repo1",
+                score=8.0,
+                risk_level=RiskLevel.LOW,
+                scan_date=datetime.now(),
+                checks=[],
+            ),
+            ScanResult(
+                repo_name="repo2",
+                repo_url="https://github.com/owner/repo2",
+                score=3.0,
+                risk_level=RiskLevel.CRITICAL,
+                scan_date=datetime.now(),
+                checks=[],
+            ),
+            ScanResult(
+                repo_name="repo3",
+                repo_url="https://github.com/owner/repo3",
+                score=0.0,
+                risk_level=RiskLevel.CRITICAL,
+                scan_date=datetime.now(),
+                checks=[],
+                error="Failed to scan",
+            ),
+        ]
+    
+        summary = ScanSummary.from_results(results, scan_duration=10.5)
+    
+        assert summary.total_repos == 3
+        assert summary.successful_scans == 2  # repo1 and repo2 (no error)
+        assert summary.failed_scans == 1  # repo3 has error
+        assert summary.average_score == 5.5  # (8.0 + 3.0) / 2
+>       assert summary.critical_count == 2  # repo2 and repo3
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 0 == 2
+E        +  where 0 = ScanSummary(total_repos=3, successful_scans=2, failed_scans=1, average_score=5.5, critical_count=0, high_count=0, medium_count=0, low_count=0, results=[ScanResult(repo_name='repo1', repo_url='https://github.com/owner/repo1', score=8.0, risk_level=<RiskLevel.LOW: 'LOW'>, scan_date=datetime.datetime(2025, 10, 26, 0, 6, 43, 493988), checks=[], workflows=[], metadata={}, error=None), ScanResult(repo_name='repo2', repo_url='https://github.com/owner/repo2', score=3.0, risk_level=<RiskLevel.CRITICAL: 'CRITICAL'>, scan_date=datetime.datetime(2025, 10, 26, 0, 6, 43, 493994), checks=[], workflows=[], metadata={}, error=None), ScanResult(repo_name='repo3', repo_url='https://github.com/owner/repo3', score=0.0, risk_level=<RiskLevel.CRITICAL: 'CRITICAL'>, scan_date=datetime.datetime(2025, 10, 26, 0, 6, 43, 493997), checks=[], workflows=[], metadata={}, error='Failed to scan')], scan_duration=10.5).critical_count
+
+tests/test_scanner.py:415: AssertionError
+______________________________ test_parse_results ______________________________
+
+runner = <actionsguard.scorecard_runner.ScorecardRunner object at 0x7ea860fd7250>
+sample_scorecard_output = {'checks': [{'details': [], 'documentation': {'short': "Determines if the project's GitHub Action workflows avoid dang...', ...}], 'date': '2024-01-15', 'repo': {'commit': 'abc123def456', 'name': 'github.com/owner/repo'}, 'score': 7.5, ...}
+
+    def test_parse_results(runner, sample_scorecard_output):
+        """Test parsing scorecard results."""
+        checks = runner.parse_results(sample_scorecard_output)
+    
+        assert len(checks) == 4
+    
+        # Test first check (Dangerous-Workflow)
+        dangerous_check = checks[0]
+        assert dangerous_check.name == "Dangerous-Workflow"
+        assert dangerous_check.score == 10
+        assert dangerous_check.status == Status.PASS
+        assert dangerous_check.reason == "No dangerous workflow patterns found"
+>       assert dangerous_check.severity == Severity.LOW
+E       AssertionError: assert <Severity.INFO: 'INFO'> == <Severity.LOW: 'LOW'>
+E         
+E         - LOW
+E         + INFO
+
+tests/test_scorecard_runner.py:207: AssertionError
+___________________ test_parse_results_severity_calculation ____________________
+
+runner = <actionsguard.scorecard_runner.ScorecardRunner object at 0x7ea860fe4c50>
+
+    def test_parse_results_severity_calculation(runner):
+        """Test severity calculation based on scores."""
+        scorecard_data = {
+            "checks": [
+                {"name": "Critical", "score": 0, "reason": "", "documentation": {"url": ""}},
+                {"name": "High", "score": 3, "reason": "", "documentation": {"url": ""}},
+                {"name": "Medium", "score": 6, "reason": "", "documentation": {"url": ""}},
+                {"name": "Low", "score": 9, "reason": "", "documentation": {"url": ""}},
+                {"name": "Skipped", "score": -1, "reason": "", "documentation": {"url": ""}},
+            ]
+        }
+    
+        checks = runner.parse_results(scorecard_data)
+    
+        # CheckResult.calculate_severity is used
+        # For skipped (-1), it uses score 10 for severity calculation
+        assert checks[0].severity == Severity.CRITICAL  # score 0
+        assert checks[1].severity in [Severity.HIGH, Severity.CRITICAL]  # score 3
+>       assert checks[2].severity in [Severity.MEDIUM, Severity.HIGH]  # score 6
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert <Severity.LOW: 'LOW'> in [<Severity.MEDIUM: 'MEDIUM'>, <Severity.HIGH: 'HIGH'>]
+E        +  where <Severity.LOW: 'LOW'> = CheckResult(name='Medium', score=6, status=<Status.WARN: 'WARN'>, reason='', documentation_url='', severity=<Severity.LOW: 'LOW'>, details={'short': '', 'details': []}).severity
+
+tests/test_scorecard_runner.py:283: AssertionError
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.11.14-final-0 _______________
+
+Name                                          Stmts   Miss  Cover   Missing
+---------------------------------------------------------------------------
+actionsguard/__init__.py                          2      0   100%
+actionsguard/__version__.py                       1      0   100%
+actionsguard/cache.py                           107      8    93%   103, 183-184, 206-207, 244-246
+actionsguard/checks/__init__.py                   0      0   100%
+actionsguard/cli.py                             555    458    17%   179-277, 280-281, 284-287, 292-305, 310-336, 378-432, 438, 492-573, 606-665, 700-749, 760-791, 796-882, 911-1103, 1127-1209
+actionsguard/github_client.py                   205     82    60%   47-48, 64-65, 87-98, 106-107, 118, 155, 177-215, 252-256, 298-308, 335-339, 385-430
+actionsguard/inventory.py                        97     66    32%   32, 45-47, 51-66, 70-82, 94-168, 172, 176, 180-194, 211-233, 237
+actionsguard/models.py                          161      1    99%   267
+actionsguard/reporters/__init__.py                6      0   100%
+actionsguard/reporters/base.py                    8      0   100%
+actionsguard/reporters/csv_reporter.py           20      0   100%
+actionsguard/reporters/html_reporter.py          24      0   100%
+actionsguard/reporters/json_reporter.py          18      0   100%
+actionsguard/reporters/markdown_reporter.py     123     21    83%   102-104, 145-146, 150-165, 197-200
+actionsguard/scanner.py                         126     21    83%   132, 206-209, 222-279
+actionsguard/scorecard_runner.py                 65      0   100%
+actionsguard/utils/__init__.py                    3      0   100%
+actionsguard/utils/config.py                     71      4    94%   87, 155-160
+actionsguard/utils/logging.py                    41     19    54%   26-62, 84, 94-96
+actionsguard/workflow_analyzer.py                86      1    99%   56
+---------------------------------------------------------------------------
+TOTAL                                          1719    681    60%
+Coverage HTML written to dir htmlcov
+=========================== short test summary info ============================
+FAILED tests/test_github_client.py::test_check_rate_limit_low_warning - AssertionError: assert 'Low rate limit' in ''
+ +  where '' = <_pytest.logging.LogCaptureFixture object at 0x7ea860f03050>.text
+FAILED tests/test_reporters.py::test_json_reporter_generate_report - assert 1 == 2
+FAILED tests/test_reporters.py::test_html_reporter_executive_summary - AssertionError: assert 'total_repos' in {'total_repositories': 4, 'successful_scans': 3, 'failed_scans': 1, 'average_score': 5.83, 'scan_duration': 120.5, 'risk_distribution': {'CRITICAL': 1, 'HIGH': 0, 'MEDIUM': 1, 'LOW': 1}, 'issue_counts': {'critical': 1, 'high': 0, 'medium': 1, 'low': 1, 'total': 3}, 'top_issues': [{'name': 'Dangerous-Workflow', 'instances': 1, 'repos_affected': 1, 'severity': 'CRITICAL'}, {'name': 'Token-Permissions', 'instances': 1, 'repos_affected': 1, 'severity': 'MEDIUM'}]}
+FAILED tests/test_reporters.py::test_markdown_reporter_generate_report - AssertionError: assert ('# ActionsGuard Security Scan Report' in '# \U0001f6e1\ufe0f ActionsGuard Security Report\n\n**Generated:** 2025-10-26 00:06:43\n\n## \U0001f4ca Executive Summary\n\n| Metric | Value |\n|--------|-------|\n| Total Repositories | 4 (3 scanned successfully) |\n| Average Score | 5.8/10 |\n| Total Issues | 3 |\n| Scan Duration | 120.5s |\n\n### Risk Distribution\n\n- \U0001f534 **Critical:** 1 repositories\n- \U0001f7e0 **High:** 0 repositories\n- \U0001f7e1 **Medium:** 1 repositories\n- \U0001f7e2 **Low:** 1 repositories\n\n### \U0001f50d Top Security Issues\n\n| Issue | Instances | Repos Affected |\n|-------|-----------|----------------|\n| Dangerous-Workflow | 1 | 1 |\n| Token-Permissions | 1 | 1 |\n\n## \U0001f4c1 Repository Details\n\n### \U0001f534 Critical Risk Repositories\n\n### \U0001f534 [owner/critical-repo](https://github.com/owner/critical-repo)\n\n**Score:** 2.0/10.0 | **Risk:** CRITICAL\n\n#### \u274c Security Issues Detected\n\n**\U0001f534 Dangerous-Workflow** (CRITICAL)\n\nScore: 0/10 - Dangerous patterns found\n\n> \U0001f4da **Documentation:** [https://example.com/dangerous](https://example.com/dangerous)\n\n---\n\n---\n\n### \U0001f7e1 Medium Risk Repositories\n\n### \U0001f7e1 [owner/medium-repo](https://github.com/owner/medium-repo)\n\n**Score:** 6.5/10.0 | **Risk:** MEDIUM\n\n#### \u26a0\ufe0f Warnings\n\n**\U0001f7e1 Token-Permissions** (MEDIUM)\n\nScore: 5/10 - Some permissions issues\n\n> \U0001f4da **Documentation:** [https://example.com/permissions](https://example.com/permissions)\n\n---\n\n---\n\n### \U0001f7e2 Low Risk Repositories\n\n### \U0001f7e2 [owner/low-repo](https://github.com/owner/low-repo)\n\n**Score:** 9.0/10.0 | **Risk:** LOW\n\n\u2705 All security checks passed.\n\n---\n\n## \U0001f4a5 Failed Scans\n\n### [owner/error-repo](https://github.com/owner/error-repo)\n\n**Error:** Failed to scan: API error\n\n---\n\n*Generated by [ActionsGuard](https://github.com/your-username/actionsguard)*\n' or 'Security Scan' in '# \U0001f6e1\ufe0f ActionsGuard Security Report\n\n**Generated:** 2025-10-26 00:06:43\n\n## \U0001f4ca Executive Summary\n\n| Metric | Value |\n|--------|-------|\n| Total Repositories | 4 (3 scanned successfully) |\n| Average Score | 5.8/10 |\n| Total Issues | 3 |\n| Scan Duration | 120.5s |\n\n### Risk Distribution\n\n- \U0001f534 **Critical:** 1 repositories\n- \U0001f7e0 **High:** 0 repositories\n- \U0001f7e1 **Medium:** 1 repositories\n- \U0001f7e2 **Low:** 1 repositories\n\n### \U0001f50d Top Security Issues\n\n| Issue | Instances | Repos Affected |\n|-------|-----------|----------------|\n| Dangerous-Workflow | 1 | 1 |\n| Token-Permissions | 1 | 1 |\n\n## \U0001f4c1 Repository Details\n\n### \U0001f534 Critical Risk Repositories\n\n### \U0001f534 [owner/critical-repo](https://github.com/owner/critical-repo)\n\n**Score:** 2.0/10.0 | **Risk:** CRITICAL\n\n#### \u274c Security Issues Detected\n\n**\U0001f534 Dangerous-Workflow** (CRITICAL)\n\nScore: 0/10 - Dangerous patterns found\n\n> \U0001f4da **Documentation:** [https://example.com/dangerous](https://example.com/dangerous)\n\n---\n\n---\n\n### \U0001f7e1 Medium Risk Repositories\n\n### \U0001f7e1 [owner/medium-repo](https://github.com/owner/medium-repo)\n\n**Score:** 6.5/10.0 | **Risk:** MEDIUM\n\n#### \u26a0\ufe0f Warnings\n\n**\U0001f7e1 Token-Permissions** (MEDIUM)\n\nScore: 5/10 - Some permissions issues\n\n> \U0001f4da **Documentation:** [https://example.com/permissions](https://example.com/permissions)\n\n---\n\n---\n\n### \U0001f7e2 Low Risk Repositories\n\n### \U0001f7e2 [owner/low-repo](https://github.com/owner/low-repo)\n\n**Score:** 9.0/10.0 | **Risk:** LOW\n\n\u2705 All security checks passed.\n\n---\n\n## \U0001f4a5 Failed Scans\n\n### [owner/error-repo](https://github.com/owner/error-repo)\n\n**Error:** Failed to scan: API error\n\n---\n\n*Generated by [ActionsGuard](https://github.com/your-username/actionsguard)*\n')
+FAILED tests/test_scanner.py::test_scan_repositories_parallel_with_progress - AssertionError: Expected 'Progress' to have been called once. Called 0 times.
+FAILED tests/test_scanner.py::test_scan_summary_from_results - AssertionError: assert 0 == 2
+ +  where 0 = ScanSummary(total_repos=3, successful_scans=2, failed_scans=1, average_score=5.5, critical_count=0, high_count=0, medium_count=0, low_count=0, results=[ScanResult(repo_name='repo1', repo_url='https://github.com/owner/repo1', score=8.0, risk_level=<RiskLevel.LOW: 'LOW'>, scan_date=datetime.datetime(2025, 10, 26, 0, 6, 43, 493988), checks=[], workflows=[], metadata={}, error=None), ScanResult(repo_name='repo2', repo_url='https://github.com/owner/repo2', score=3.0, risk_level=<RiskLevel.CRITICAL: 'CRITICAL'>, scan_date=datetime.datetime(2025, 10, 26, 0, 6, 43, 493994), checks=[], workflows=[], metadata={}, error=None), ScanResult(repo_name='repo3', repo_url='https://github.com/owner/repo3', score=0.0, risk_level=<RiskLevel.CRITICAL: 'CRITICAL'>, scan_date=datetime.datetime(2025, 10, 26, 0, 6, 43, 493997), checks=[], workflows=[], metadata={}, error='Failed to scan')], scan_duration=10.5).critical_count
+FAILED tests/test_scorecard_runner.py::test_parse_results - AssertionError: assert <Severity.INFO: 'INFO'> == <Severity.LOW: 'LOW'>
+  
+  - LOW
+  + INFO
+FAILED tests/test_scorecard_runner.py::test_parse_results_severity_calculation - AssertionError: assert <Severity.LOW: 'LOW'> in [<Severity.MEDIUM: 'MEDIUM'>, <Severity.HIGH: 'HIGH'>]
+ +  where <Severity.LOW: 'LOW'> = CheckResult(name='Medium', score=6, status=<Status.WARN: 'WARN'>, reason='', documentation_url='', severity=<Severity.LOW: 'LOW'>, details={'short': '', 'details': []}).severity
+======================== 8 failed, 140 passed in 4.45s =========================
