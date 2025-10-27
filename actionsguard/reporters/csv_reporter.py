@@ -31,36 +31,40 @@ class CSVReporter(BaseReporter):
             writer = csv.writer(f)
 
             # Write header
-            writer.writerow([
-                "Repository",
-                "URL",
-                "Score",
-                "Risk Level",
-                "Critical Issues",
-                "High Issues",
-                "Medium Issues",
-                "Low Issues",
-                "Has Workflows",
-                "Error",
-            ])
+            writer.writerow(
+                [
+                    "Repository",
+                    "URL",
+                    "Score",
+                    "Risk Level",
+                    "Critical Issues",
+                    "High Issues",
+                    "Medium Issues",
+                    "Low Issues",
+                    "Has Workflows",
+                    "Error",
+                ]
+            )
 
             # Write data rows
             for result in summary.results:
                 severity_counts = result.get_severity_counts()
                 has_workflows = result.metadata.get("has_workflows", True)
 
-                writer.writerow([
-                    result.repo_name,
-                    result.repo_url,
-                    f"{result.score:.1f}",
-                    result.risk_level.value,
-                    severity_counts["CRITICAL"],
-                    severity_counts["HIGH"],
-                    severity_counts["MEDIUM"],
-                    severity_counts["LOW"],
-                    "Yes" if has_workflows else "No",
-                    result.error or "",
-                ])
+                writer.writerow(
+                    [
+                        result.repo_name,
+                        result.repo_url,
+                        f"{result.score:.1f}",
+                        result.risk_level.value,
+                        severity_counts["CRITICAL"],
+                        severity_counts["HIGH"],
+                        severity_counts["MEDIUM"],
+                        severity_counts["LOW"],
+                        "Yes" if has_workflows else "No",
+                        result.error or "",
+                    ]
+                )
 
         logger.info(f"Generated CSV report: {output_path}")
         return output_path

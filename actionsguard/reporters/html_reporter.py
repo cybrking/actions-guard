@@ -49,20 +49,16 @@ class HTMLReporter(BaseReporter):
             "exec_summary": exec_summary,
             "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "critical_repos": [
-                r for r in summary.results
-                if r.risk_level.value == "CRITICAL" and not r.error
+                r for r in summary.results if r.risk_level.value == "CRITICAL" and not r.error
             ],
             "high_repos": [
-                r for r in summary.results
-                if r.risk_level.value == "HIGH" and not r.error
+                r for r in summary.results if r.risk_level.value == "HIGH" and not r.error
             ],
             "medium_repos": [
-                r for r in summary.results
-                if r.risk_level.value == "MEDIUM" and not r.error
+                r for r in summary.results if r.risk_level.value == "MEDIUM" and not r.error
             ],
             "low_repos": [
-                r for r in summary.results
-                if r.risk_level.value == "LOW" and not r.error
+                r for r in summary.results if r.risk_level.value == "LOW" and not r.error
             ],
             "error_repos": [r for r in summary.results if r.error],
         }

@@ -12,9 +12,7 @@ from typing import List, Optional, Dict, Any
 class Config:
     """Configuration for ActionsGuard scanner."""
 
-    github_token: Optional[str] = field(
-        default_factory=lambda: os.getenv("GITHUB_TOKEN")
-    )
+    github_token: Optional[str] = field(default_factory=lambda: os.getenv("GITHUB_TOKEN"))
     output_dir: str = "./reports"
     formats: List[str] = field(default_factory=lambda: ["json", "html", "csv", "markdown"])
     checks: List[str] = field(
@@ -72,15 +70,14 @@ class Config:
         ext = path.suffix.lower()
 
         try:
-            with open(path, 'r', encoding='utf-8') as f:
-                if ext in ('.yml', '.yaml'):
+            with open(path, "r", encoding="utf-8") as f:
+                if ext in (".yml", ".yaml"):
                     data = yaml.safe_load(f)
-                elif ext == '.json':
+                elif ext == ".json":
                     data = json.load(f)
                 else:
                     raise ValueError(
-                        f"Unsupported config file format: {ext}. "
-                        "Use .yml, .yaml, or .json"
+                        f"Unsupported config file format: {ext}. " "Use .yml, .yaml, or .json"
                     )
 
             if not isinstance(data, dict):
@@ -142,19 +139,18 @@ class Config:
         data = self.to_dict()
 
         # Don't save the token to file for security
-        if 'github_token' in data:
-            data['github_token'] = None
+        if "github_token" in data:
+            data["github_token"] = None
 
         try:
-            with open(path, 'w', encoding='utf-8') as f:
-                if ext in ('.yml', '.yaml'):
+            with open(path, "w", encoding="utf-8") as f:
+                if ext in (".yml", ".yaml"):
                     yaml.safe_dump(data, f, default_flow_style=False, sort_keys=False)
-                elif ext == '.json':
+                elif ext == ".json":
                     json.dump(data, f, indent=2)
                 else:
                     raise ValueError(
-                        f"Unsupported config file format: {ext}. "
-                        "Use .yml, .yaml, or .json"
+                        f"Unsupported config file format: {ext}. " "Use .yml, .yaml, or .json"
                     )
         except Exception as e:
             raise ValueError(f"Failed to write config file: {e}")

@@ -44,10 +44,7 @@ class ScorecardRunner:
         logger.debug("Scorecard CLI found")
 
     def run_scorecard(
-        self,
-        repo_url: str,
-        checks: Optional[List[str]] = None,
-        github_token: Optional[str] = None
+        self, repo_url: str, checks: Optional[List[str]] = None, github_token: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Run Scorecard on a repository.
@@ -91,7 +88,7 @@ class ScorecardRunner:
                 capture_output=True,
                 text=True,
                 timeout=self.timeout,
-                env={**subprocess.os.environ, **env}
+                env={**subprocess.os.environ, **env},
             )
 
             if result.returncode != 0:
@@ -109,9 +106,7 @@ class ScorecardRunner:
 
         except subprocess.TimeoutExpired:
             logger.error(f"Scorecard timed out after {self.timeout} seconds")
-            raise TimeoutError(
-                f"Scorecard execution timed out after {self.timeout} seconds"
-            )
+            raise TimeoutError(f"Scorecard execution timed out after {self.timeout} seconds")
 
     def parse_results(self, scorecard_data: Dict[str, Any]) -> List[CheckResult]:
         """

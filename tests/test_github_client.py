@@ -17,7 +17,7 @@ def mock_github_token():
 @pytest.fixture
 def mock_github_client(mock_github_token):
     """Create a mock GitHub client."""
-    with patch('actionsguard.github_client.Github') as mock_github:
+    with patch("actionsguard.github_client.Github") as mock_github:
         # Mock the get_user() call for token validation
         mock_user = Mock()
         mock_user.login = "test_user"
@@ -29,7 +29,7 @@ def mock_github_client(mock_github_token):
 
 def test_client_initialization(mock_github_token):
     """Test GitHub client initialization."""
-    with patch('actionsguard.github_client.Github') as mock_github:
+    with patch("actionsguard.github_client.Github") as mock_github:
         mock_user = Mock()
         mock_user.login = "test_user"
         mock_github.return_value.get_user.return_value = mock_user
@@ -42,12 +42,10 @@ def test_client_initialization(mock_github_token):
 
 def test_client_invalid_token():
     """Test client initialization with invalid token."""
-    with patch('actionsguard.github_client.Github') as mock_github:
+    with patch("actionsguard.github_client.Github") as mock_github:
         # Simulate 401 unauthorized
         mock_github.return_value.get_user.side_effect = GithubException(
-            status=401,
-            data={"message": "Bad credentials"},
-            headers={}
+            status=401, data={"message": "Bad credentials"}, headers={}
         )
 
         with pytest.raises(ValueError, match="Invalid GitHub token"):
@@ -78,9 +76,7 @@ def test_retry_decorator_with_rate_limit():
         call_count[0] += 1
         if call_count[0] < 2:
             raise RateLimitExceededException(
-                status=403,
-                data={"message": "Rate limit exceeded"},
-                headers={}
+                status=403, data={"message": "Rate limit exceeded"}, headers={}
             )
         return "success"
 
@@ -103,11 +99,7 @@ def test_retry_decorator_max_retries_exceeded():
     @retry_with_backoff(max_retries=2, base_delay=0.05)
     def always_fails():
         call_count[0] += 1
-        raise GithubException(
-            status=500,
-            data={"message": "Server error"},
-            headers={}
-        )
+        raise GithubException(status=500, data={"message": "Server error"}, headers={})
 
     with pytest.raises(GithubException):
         always_fails()
@@ -125,9 +117,7 @@ def test_retry_decorator_server_error():
             call_count[0] += 1
             if call_count[0] < 2:
                 raise GithubException(
-                    status=error_code,
-                    data={"message": f"Server error {error_code}"},
-                    headers={}
+                    status=error_code, data={"message": f"Server error {error_code}"}, headers={}
                 )
             return "success"
 
@@ -143,11 +133,7 @@ def test_retry_decorator_client_error_no_retry():
     @retry_with_backoff(max_retries=3, base_delay=0.05)
     def client_error_function():
         call_count[0] += 1
-        raise GithubException(
-            status=404,
-            data={"message": "Not found"},
-            headers={}
-        )
+        raise GithubException(status=404, data={"message": "Not found"}, headers={})
 
     with pytest.raises(GithubException):
         client_error_function()
@@ -186,11 +172,7 @@ def test_has_workflows_true(mock_github_client):
 def test_has_workflows_false(mock_github_client):
     """Test detecting no workflows in repository."""
     mock_repo = Mock()
-    mock_repo.get_contents.side_effect = GithubException(
-        status=404,
-        data={},
-        headers={}
-    )
+    mock_repo.get_contents.side_effect = GithubException(status=404, data={}, headers={})
 
     result = mock_github_client.has_workflows(mock_repo)
 
@@ -213,9 +195,7 @@ def test_get_repository(mock_github_client):
 def test_get_repository_not_found(mock_github_client):
     """Test getting non-existent repository."""
     mock_github_client.github.get_repo.side_effect = GithubException(
-        status=404,
-        data={},
-        headers={}
+        status=404, data={}, headers={}
     )
 
     with pytest.raises(ValueError, match="not found"):
@@ -330,20 +310,14 @@ def test_get_user_repos_with_filters(mock_github_client):
     mock_github_client.github.get_user.return_value = mock_user
 
     # Test with 'only' filter
-    repos = mock_github_client.get_user_repos(
-        username="test_user",
-        only=["repo1", "repo3"]
-    )
+    repos = mock_github_client.get_user_repos(username="test_user", only=["repo1", "repo3"])
 
     assert len(repos) == 2
     assert repos[0].name in ["repo1", "repo3"]
     assert repos[1].name in ["repo1", "repo3"]
 
     # Test with 'exclude' filter
-    repos = mock_github_client.get_user_repos(
-        username="test_user",
-        exclude=["repo2"]
-    )
+    repos = mock_github_client.get_user_repos(username="test_user", exclude=["repo2"])
 
     assert len(repos) == 2
     assert all(r.name != "repo2" for r in repos)

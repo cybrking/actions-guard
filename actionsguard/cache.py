@@ -71,11 +71,11 @@ class ResultCache:
             return None
 
         try:
-            with open(cache_path, 'r', encoding='utf-8') as f:
+            with open(cache_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
 
             # Check if cache is still fresh
-            cached_time = datetime.fromisoformat(data['cached_at'])
+            cached_time = datetime.fromisoformat(data["cached_at"])
             age = datetime.now() - cached_time
 
             if age > self.ttl:
@@ -87,60 +87,71 @@ class ResultCache:
             logger.info(f"Using cached result for {repo_name} (age: {age})")
 
             # Reconstruct ScanResult from cached data
-            result_data = data['result']
+            result_data = data["result"]
             # Convert ISO format back to datetime
-            result_data['scan_date'] = datetime.fromisoformat(result_data['scan_date'])
+            result_data["scan_date"] = datetime.fromisoformat(result_data["scan_date"])
 
             # Import here to avoid circular dependency
             from actionsguard.models import (
-                ScanResult, CheckResult, WorkflowAnalysis, WorkflowFinding,
-                RiskLevel, Status, Severity
+                ScanResult,
+                CheckResult,
+                WorkflowAnalysis,
+                WorkflowFinding,
+                RiskLevel,
+                Status,
+                Severity,
             )
 
             # Reconstruct checks
             checks_list = []
-            for check_data in result_data.get('checks', []):
-                checks_list.append(CheckResult(
-                    name=check_data['name'],
-                    score=check_data['score'],
-                    status=Status(check_data['status']),
-                    reason=check_data['reason'],
-                    documentation_url=check_data['documentation_url'],
-                    severity=Severity(check_data['severity']),
-                    details=check_data.get('details')
-                ))
+            for check_data in result_data.get("checks", []):
+                checks_list.append(
+                    CheckResult(
+                        name=check_data["name"],
+                        score=check_data["score"],
+                        status=Status(check_data["status"]),
+                        reason=check_data["reason"],
+                        documentation_url=check_data["documentation_url"],
+                        severity=Severity(check_data["severity"]),
+                        details=check_data.get("details"),
+                    )
+                )
 
             # Reconstruct workflows
             workflows_list = []
-            for workflow_data in result_data.get('workflows', []):
+            for workflow_data in result_data.get("workflows", []):
                 findings = []
-                for finding_data in workflow_data.get('findings', []):
-                    findings.append(WorkflowFinding(
-                        workflow_path=finding_data['workflow_path'],
-                        check_name=finding_data['check_name'],
-                        severity=Severity(finding_data['severity']),
-                        message=finding_data['message'],
-                        line_number=finding_data.get('line_number'),
-                        snippet=finding_data.get('snippet'),
-                        recommendation=finding_data.get('recommendation')
-                    ))
+                for finding_data in workflow_data.get("findings", []):
+                    findings.append(
+                        WorkflowFinding(
+                            workflow_path=finding_data["workflow_path"],
+                            check_name=finding_data["check_name"],
+                            severity=Severity(finding_data["severity"]),
+                            message=finding_data["message"],
+                            line_number=finding_data.get("line_number"),
+                            snippet=finding_data.get("snippet"),
+                            recommendation=finding_data.get("recommendation"),
+                        )
+                    )
 
-                workflows_list.append(WorkflowAnalysis(
-                    path=workflow_data['path'],
-                    findings=findings,
-                    score=workflow_data.get('score')
-                ))
+                workflows_list.append(
+                    WorkflowAnalysis(
+                        path=workflow_data["path"],
+                        findings=findings,
+                        score=workflow_data.get("score"),
+                    )
+                )
 
             result = ScanResult(
-                repo_name=result_data['repo_name'],
-                repo_url=result_data['repo_url'],
-                score=result_data['score'],
-                risk_level=RiskLevel(result_data['risk_level']),
-                scan_date=result_data['scan_date'],
+                repo_name=result_data["repo_name"],
+                repo_url=result_data["repo_url"],
+                score=result_data["score"],
+                risk_level=RiskLevel(result_data["risk_level"]),
+                scan_date=result_data["scan_date"],
                 checks=checks_list,
                 workflows=workflows_list,
-                metadata=result_data.get('metadata', {}),
-                error=result_data.get('error')
+                metadata=result_data.get("metadata", {}),
+                error=result_data.get("error"),
             )
 
             return result
@@ -169,13 +180,13 @@ class ResultCache:
             result_dict = result.to_dict()
 
             cache_data = {
-                'cached_at': datetime.now().isoformat(),
-                'repo_name': repo_name,
-                'checks': checks,
-                'result': result_dict
+                "cached_at": datetime.now().isoformat(),
+                "repo_name": repo_name,
+                "checks": checks,
+                "result": result_dict,
             }
 
-            with open(cache_path, 'w', encoding='utf-8') as f:
+            with open(cache_path, "w", encoding="utf-8") as f:
                 json.dump(cache_data, f, indent=2)
 
             logger.debug(f"Cached result for {repo_name}")
@@ -198,9 +209,9 @@ class ResultCache:
             count = 0
             for cache_file in self.cache_dir.glob("*.json"):
                 try:
-                    with open(cache_file, 'r') as f:
+                    with open(cache_file, "r") as f:
                         data = json.load(f)
-                    if data.get('repo_name') == repo_name:
+                    if data.get("repo_name") == repo_name:
                         cache_file.unlink()
                         count += 1
                 except Exception:
@@ -233,9 +244,9 @@ class ResultCache:
             total_size += cache_file.stat().st_size
 
             try:
-                with open(cache_file, 'r') as f:
+                with open(cache_file, "r") as f:
                     data = json.load(f)
-                cached_time = datetime.fromisoformat(data['cached_at'])
+                cached_time = datetime.fromisoformat(data["cached_at"])
                 age = datetime.now() - cached_time
 
                 if age <= self.ttl:
@@ -246,10 +257,10 @@ class ResultCache:
                 expired += 1
 
         return {
-            'total_entries': total,
-            'fresh_entries': fresh,
-            'expired_entries': expired,
-            'total_size_bytes': total_size,
-            'cache_dir': str(self.cache_dir),
-            'ttl_hours': self.ttl.total_seconds() / 3600
+            "total_entries": total,
+            "fresh_entries": fresh,
+            "expired_entries": expired,
+            "total_size_bytes": total_size,
+            "cache_dir": str(self.cache_dir),
+            "ttl_hours": self.ttl.total_seconds() / 3600,
         }
