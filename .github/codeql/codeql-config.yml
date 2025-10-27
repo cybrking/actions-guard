@@ -1,0 +1,38 @@
+name: "ActionsGuard CodeQL Config"
+
+# Paths to include in the analysis
+paths:
+  - actionsguard
+
+# Paths to exclude from the analysis
+paths-ignore:
+  - tests
+  - docs
+  - examples
+  - '**/*.md'
+  - '**/__pycache__'
+  - '**/node_modules'
+
+# Query suites to run
+queries:
+  - name: Security and Quality Queries
+    uses: security-and-quality
+
+  # Additional Python-specific security queries
+  - name: Python Security Extended
+    uses: security-extended
+
+# Custom query packs (optional)
+# packs:
+#   - codeql/python-queries
+
+# Disable specific queries (if needed)
+# disable-default-queries: false
+
+# Configure analysis
+# buildless: true  # For interpreted languages like Python
+
+# External dependencies (if needed)
+# external:
+#   - name: some-package
+#     url: https://example.com/package
