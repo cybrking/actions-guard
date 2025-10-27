@@ -1,0 +1,34 @@
+name: Auto-merge Claude branches
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    # Only run for PRs from claude/* branches
+    if: startsWith(github.head_ref, 'claude/')
+
+    steps:
+      - name: Enable auto-merge for Claude branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          echo "Enabling auto-merge for PR #$PR_NUMBER from branch ${{ github.head_ref }}"
+
+          # Enable auto-merge with squash strategy
+          gh pr merge $PR_NUMBER \
+            --repo ${{ github.repository }} \
+            --auto \
+            --squash \
+            --delete-branch
+
+          echo "✅ Auto-merge enabled. PR will merge automatically when all checks pass."
