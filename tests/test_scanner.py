@@ -70,18 +70,18 @@ def mock_scan_result():
 @pytest.fixture
 def scanner(mock_config):
     """Create a Scanner instance with mocked dependencies."""
-    with patch('actionsguard.scanner.GitHubClient'), \
-         patch('actionsguard.scanner.ScorecardRunner'), \
-         patch('actionsguard.scanner.WorkflowAnalyzer'):
+    with patch("actionsguard.scanner.GitHubClient"), patch(
+        "actionsguard.scanner.ScorecardRunner"
+    ), patch("actionsguard.scanner.WorkflowAnalyzer"):
         scanner = Scanner(mock_config, show_progress=False)
         yield scanner
 
 
 def test_scanner_initialization(mock_config):
     """Test scanner initialization."""
-    with patch('actionsguard.scanner.GitHubClient') as mock_gh, \
-         patch('actionsguard.scanner.ScorecardRunner') as mock_sc, \
-         patch('actionsguard.scanner.WorkflowAnalyzer') as mock_wa:
+    with patch("actionsguard.scanner.GitHubClient") as mock_gh, patch(
+        "actionsguard.scanner.ScorecardRunner"
+    ) as mock_sc, patch("actionsguard.scanner.WorkflowAnalyzer") as mock_wa:
 
         scanner = Scanner(mock_config, show_progress=True)
 
@@ -95,10 +95,11 @@ def test_scanner_initialization(mock_config):
 
 def test_scanner_initialization_with_cache(mock_config_with_cache):
     """Test scanner initialization with cache enabled."""
-    with patch('actionsguard.scanner.GitHubClient'), \
-         patch('actionsguard.scanner.ScorecardRunner'), \
-         patch('actionsguard.scanner.WorkflowAnalyzer'), \
-         patch('actionsguard.scanner.ResultCache') as mock_cache:
+    with patch("actionsguard.scanner.GitHubClient"), patch(
+        "actionsguard.scanner.ScorecardRunner"
+    ), patch("actionsguard.scanner.WorkflowAnalyzer"), patch(
+        "actionsguard.scanner.ResultCache"
+    ) as mock_cache:
 
         scanner = Scanner(mock_config_with_cache)
 
@@ -108,10 +109,11 @@ def test_scanner_initialization_with_cache(mock_config_with_cache):
 
 def test_scan_repository_with_cache_hit(mock_config_with_cache, mock_repo, mock_scan_result):
     """Test scanning repository with cache hit."""
-    with patch('actionsguard.scanner.GitHubClient'), \
-         patch('actionsguard.scanner.ScorecardRunner'), \
-         patch('actionsguard.scanner.WorkflowAnalyzer'), \
-         patch('actionsguard.scanner.ResultCache') as mock_cache_class:
+    with patch("actionsguard.scanner.GitHubClient"), patch(
+        "actionsguard.scanner.ScorecardRunner"
+    ), patch("actionsguard.scanner.WorkflowAnalyzer"), patch(
+        "actionsguard.scanner.ResultCache"
+    ) as mock_cache_class:
 
         # Setup cache to return cached result
         mock_cache = Mock()
@@ -153,7 +155,7 @@ def test_scan_repository_successful(scanner, mock_repo):
                 "score": 8,
                 "reason": "No dangerous patterns",
                 "documentation": {"url": "https://example.com"},
-                "details": []
+                "details": [],
             }
         ],
         "scorecard": {"version": "4.0.0"},
@@ -244,10 +246,11 @@ def test_scan_repositories_parallel(scanner, mock_repo):
 
 def test_scan_repositories_parallel_with_progress(mock_config):
     """Test scanning with progress bar enabled."""
-    with patch('actionsguard.scanner.GitHubClient'), \
-         patch('actionsguard.scanner.ScorecardRunner'), \
-         patch('actionsguard.scanner.WorkflowAnalyzer'), \
-         patch('actionsguard.scanner.Progress') as mock_progress:
+    with patch("actionsguard.scanner.GitHubClient"), patch(
+        "actionsguard.scanner.ScorecardRunner"
+    ), patch("actionsguard.scanner.WorkflowAnalyzer"), patch(
+        "actionsguard.scanner.Progress"
+    ) as mock_progress:
 
         # Setup progress mock
         mock_progress_instance = MagicMock()
@@ -342,10 +345,7 @@ def test_scan_user_successful(scanner, mock_repo):
     scanner.github_client.has_workflows.return_value = False
 
     summary = scanner.scan_user(
-        username="test-user",
-        exclude=["repo1"],
-        only=["test-repo"],
-        include_forks=True
+        username="test-user", exclude=["repo1"], only=["test-repo"], include_forks=True
     )
 
     assert summary.total_repos == 1
@@ -449,10 +449,11 @@ def test_scan_summary_from_results():
 
 def test_scan_repository_caches_result(mock_config_with_cache, mock_repo):
     """Test that scan results are cached when cache is enabled."""
-    with patch('actionsguard.scanner.GitHubClient'), \
-         patch('actionsguard.scanner.ScorecardRunner'), \
-         patch('actionsguard.scanner.WorkflowAnalyzer'), \
-         patch('actionsguard.scanner.ResultCache') as mock_cache_class:
+    with patch("actionsguard.scanner.GitHubClient"), patch(
+        "actionsguard.scanner.ScorecardRunner"
+    ), patch("actionsguard.scanner.WorkflowAnalyzer"), patch(
+        "actionsguard.scanner.ResultCache"
+    ) as mock_cache_class:
 
         # Setup cache to return None (no cached result)
         mock_cache = Mock()
@@ -474,10 +475,11 @@ def test_scan_repository_caches_result(mock_config_with_cache, mock_repo):
 
 def test_scan_repository_no_cache_on_error(mock_config_with_cache, mock_repo):
     """Test that errors are not cached."""
-    with patch('actionsguard.scanner.GitHubClient'), \
-         patch('actionsguard.scanner.ScorecardRunner'), \
-         patch('actionsguard.scanner.WorkflowAnalyzer'), \
-         patch('actionsguard.scanner.ResultCache') as mock_cache_class:
+    with patch("actionsguard.scanner.GitHubClient"), patch(
+        "actionsguard.scanner.ScorecardRunner"
+    ), patch("actionsguard.scanner.WorkflowAnalyzer"), patch(
+        "actionsguard.scanner.ResultCache"
+    ) as mock_cache_class:
 
         mock_cache = Mock()
         mock_cache.get.return_value = None

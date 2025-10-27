@@ -148,7 +148,9 @@ def test_analyze_scorecard_results_successful(analyzer, sample_scorecard_data, s
         assert finding.message
 
 
-def test_analyze_scorecard_results_with_line_numbers(analyzer, sample_scorecard_data, sample_checks):
+def test_analyze_scorecard_results_with_line_numbers(
+    analyzer, sample_scorecard_data, sample_checks
+):
     """Test that line numbers are extracted from details."""
     workflows = analyzer.analyze_scorecard_results(sample_scorecard_data, sample_checks)
 
@@ -191,7 +193,11 @@ def test_analyze_scorecard_results_workflow_sorting(analyzer, sample_checks):
                 "reason": "Critical issues",
                 "documentation": {"url": "https://example.com"},
                 "details": [
-                    {"path": ".github/workflows/critical.yml", "msg": "Critical issue", "type": "Warn"},
+                    {
+                        "path": ".github/workflows/critical.yml",
+                        "msg": "Critical issue",
+                        "type": "Warn",
+                    },
                 ],
             },
             {
@@ -335,8 +341,7 @@ def test_get_recommendation_token_permissions_write(analyzer):
 def test_get_recommendation_pinned_dependencies_with_action(analyzer):
     """Test recommendation for unpinned dependencies with action name."""
     rec = analyzer._get_recommendation(
-        "Pinned-Dependencies",
-        "unpinned dependency actions/checkout@v3"
+        "Pinned-Dependencies", "unpinned dependency actions/checkout@v3"
     )
 
     assert "actions/checkout" in rec

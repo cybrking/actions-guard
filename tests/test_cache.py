@@ -34,7 +34,7 @@ def sample_result():
         scan_date=datetime.now(),
         checks=[],
         workflows=[],
-        metadata={"has_workflows": True}
+        metadata={"has_workflows": True},
     )
 
 
@@ -99,14 +99,14 @@ def test_cache_expiration(temp_cache_dir, sample_result):
     cache_key = cache._get_cache_key("owner/repo", checks)
     cache_path = cache._get_cache_path(cache_key)
 
-    with open(cache_path, 'r') as f:
+    with open(cache_path, "r") as f:
         data = json.load(f)
 
     # Set cache time to 2 hours ago
     expired_time = datetime.now() - timedelta(hours=2)
-    data['cached_at'] = expired_time.isoformat()
+    data["cached_at"] = expired_time.isoformat()
 
-    with open(cache_path, 'w') as f:
+    with open(cache_path, "w") as f:
         json.dump(data, f)
 
     # Should return None for expired cache
@@ -168,19 +168,19 @@ def test_cache_stats(cache, sample_result):
     """Test cache statistics."""
     # Empty cache
     stats = cache.stats()
-    assert stats['total_entries'] == 0
-    assert stats['fresh_entries'] == 0
+    assert stats["total_entries"] == 0
+    assert stats["fresh_entries"] == 0
 
     # Add some entries
     cache.set("owner/repo1", ["check1"], sample_result)
     cache.set("owner/repo2", ["check1"], sample_result)
 
     stats = cache.stats()
-    assert stats['total_entries'] == 2
-    assert stats['fresh_entries'] == 2
-    assert stats['expired_entries'] == 0
-    assert stats['total_size_bytes'] > 0
-    assert stats['ttl_hours'] == 24
+    assert stats["total_entries"] == 2
+    assert stats["fresh_entries"] == 2
+    assert stats["expired_entries"] == 0
+    assert stats["total_size_bytes"] > 0
+    assert stats["ttl_hours"] == 24
 
 
 def test_cache_corrupted_file(cache, sample_result, temp_cache_dir):
@@ -192,7 +192,7 @@ def test_cache_corrupted_file(cache, sample_result, temp_cache_dir):
     cache_key = cache._get_cache_key("owner/repo", checks)
     cache_path = cache._get_cache_path(cache_key)
 
-    with open(cache_path, 'w') as f:
+    with open(cache_path, "w") as f:
         f.write("invalid json{")
 
     # Should return None and clean up corrupted file
@@ -211,14 +211,10 @@ def test_cache_with_workflow_findings(cache):
         severity=Severity.HIGH,
         message="Issue found",
         line_number=10,
-        recommendation="Fix it"
+        recommendation="Fix it",
     )
 
-    workflow = WorkflowAnalysis(
-        path=".github/workflows/ci.yml",
-        findings=[finding],
-        score=5.0
-    )
+    workflow = WorkflowAnalysis(path=".github/workflows/ci.yml", findings=[finding], score=5.0)
 
     result = ScanResult(
         repo_name="owner/repo",
@@ -228,7 +224,7 @@ def test_cache_with_workflow_findings(cache):
         scan_date=datetime.now(),
         checks=[],
         workflows=[workflow],
-        metadata={}
+        metadata={},
     )
 
     checks = ["Dangerous-Workflow"]

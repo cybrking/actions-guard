@@ -21,11 +21,7 @@ class BaseReporter(ABC):
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
     @abstractmethod
-    def generate_report(
-        self,
-        summary: ScanSummary,
-        filename: str
-    ) -> Path:
+    def generate_report(self, summary: ScanSummary, filename: str) -> Path:
         """
         Generate a report.
 

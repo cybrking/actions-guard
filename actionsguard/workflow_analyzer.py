@@ -15,9 +15,7 @@ class WorkflowAnalyzer:
         pass
 
     def analyze_scorecard_results(
-        self,
-        scorecard_data: Dict[str, Any],
-        checks: List[CheckResult]
+        self, scorecard_data: Dict[str, Any], checks: List[CheckResult]
     ) -> List[WorkflowAnalysis]:
         """
         Extract workflow-level findings from Scorecard results.
@@ -47,10 +45,7 @@ class WorkflowAnalyzer:
             check_score = check_data.get("score", 0)
 
             # Find corresponding CheckResult for severity
-            check_result = next(
-                (c for c in checks if c.name == check_name),
-                None
-            )
+            check_result = next((c for c in checks if c.name == check_name), None)
 
             if not check_result:
                 continue
@@ -109,7 +104,7 @@ class WorkflowAnalyzer:
         # Sort by number of findings (most issues first)
         workflow_analyses.sort(
             key=lambda w: (w.get_critical_count(), w.get_high_count(), len(w.findings)),
-            reverse=True
+            reverse=True,
         )
 
         return workflow_analyses
@@ -135,7 +130,8 @@ class WorkflowAnalyzer:
         if ".github/workflows/" in msg:
             # Extract path from message like "found in .github/workflows/ci.yml"
             import re
-            match = re.search(r'\.github/workflows/[\w\-\.]+\.ya?ml', msg)
+
+            match = re.search(r"\.github/workflows/[\w\-\.]+\.ya?ml", msg)
             if match:
                 return match.group(0)
 
@@ -192,7 +188,7 @@ class WorkflowAnalyzer:
             return (
                 "Avoid using untrusted input directly in shell commands. "
                 "Use environment variables or GITHUB_ENV file instead. "
-                "Example: echo \"INPUT=${{ inputs.value }}\" >> $GITHUB_ENV"
+                'Example: echo "INPUT=${{ inputs.value }}" >> $GITHUB_ENV'
             )
 
         return "Review workflow for dangerous patterns and follow GitHub Actions security best practices."
@@ -214,7 +210,8 @@ class WorkflowAnalyzer:
         """Generate recommendation for unpinned dependencies."""
         # Extract action name if possible
         import re
-        action_match = re.search(r'([\w\-]+/[\w\-]+)@(v?\d+)', message)
+
+        action_match = re.search(r"([\w\-]+/[\w\-]+)@(v?\d+)", message)
 
         if action_match:
             action_name = action_match.group(1)

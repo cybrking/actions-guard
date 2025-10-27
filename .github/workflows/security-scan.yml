@@ -15,12 +15,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Set up Go (for Scorecard)
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: '1.21'
 
@@ -39,7 +39,7 @@ jobs:
           actionsguard scan --repo ${{ github.repository }} --output ./reports --format html,json,markdown
 
       - name: Upload scan reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: security-reports
           path: reports/

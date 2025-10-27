@@ -120,7 +120,7 @@ def test_json_reporter_generate_report(temp_output_dir, sample_summary):
     assert output_path.name == "test_report.json"
 
     # Validate JSON structure
-    with open(output_path, 'r') as f:
+    with open(output_path, "r") as f:
         report_data = json.load(f)
 
     assert report_data["schema_version"] == JSONReporter.SCHEMA_VERSION
@@ -159,14 +159,14 @@ def test_json_reporter_creates_directory():
 # HTMLReporter Tests
 def test_html_reporter_initialization(temp_output_dir):
     """Test HTML reporter initialization."""
-    with patch('actionsguard.reporters.html_reporter.Environment'):
+    with patch("actionsguard.reporters.html_reporter.Environment"):
         reporter = HTMLReporter(temp_output_dir)
         assert reporter.output_dir == Path(temp_output_dir)
 
 
 def test_html_reporter_get_extension():
     """Test HTML reporter extension."""
-    with patch('actionsguard.reporters.html_reporter.Environment'):
+    with patch("actionsguard.reporters.html_reporter.Environment"):
         reporter = HTMLReporter("./test")
         assert reporter.get_extension() == ".html"
 
@@ -180,7 +180,7 @@ def test_html_reporter_generate_report(temp_output_dir, sample_summary):
     mock_env = Mock()
     mock_env.get_template.return_value = mock_template
 
-    with patch('actionsguard.reporters.html_reporter.Environment', return_value=mock_env):
+    with patch("actionsguard.reporters.html_reporter.Environment", return_value=mock_env):
         reporter = HTMLReporter(temp_output_dir)
         output_path = reporter.generate_report(sample_summary, filename="test_report")
 
@@ -205,7 +205,7 @@ def test_html_reporter_generate_report(temp_output_dir, sample_summary):
         assert len(template_data["error_repos"]) == 1
 
         # Read generated file
-        with open(output_path, 'r') as f:
+        with open(output_path, "r") as f:
             content = f.read()
         assert "Test Report" in content
 
@@ -218,7 +218,7 @@ def test_html_reporter_executive_summary(temp_output_dir, sample_summary):
     mock_env = Mock()
     mock_env.get_template.return_value = mock_template
 
-    with patch('actionsguard.reporters.html_reporter.Environment', return_value=mock_env):
+    with patch("actionsguard.reporters.html_reporter.Environment", return_value=mock_env):
         reporter = HTMLReporter(temp_output_dir)
         reporter.generate_report(sample_summary)
 
@@ -234,6 +234,7 @@ def test_html_reporter_executive_summary(temp_output_dir, sample_summary):
 def test_csv_reporter_initialization(temp_output_dir):
     """Test CSV reporter initialization."""
     from actionsguard.reporters.csv_reporter import CSVReporter
+
     reporter = CSVReporter(temp_output_dir)
     assert reporter.output_dir == Path(temp_output_dir)
 
@@ -241,6 +242,7 @@ def test_csv_reporter_initialization(temp_output_dir):
 def test_csv_reporter_get_extension():
     """Test CSV reporter extension."""
     from actionsguard.reporters.csv_reporter import CSVReporter
+
     reporter = CSVReporter("./test")
     assert reporter.get_extension() == ".csv"
 
@@ -257,7 +259,7 @@ def test_csv_reporter_generate_report(temp_output_dir, sample_summary):
     assert output_path.name == "test_report.csv"
 
     # Read and validate CSV
-    with open(output_path, 'r', newline='', encoding='utf-8') as f:
+    with open(output_path, "r", newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         rows = list(reader)
 
@@ -285,6 +287,7 @@ def test_csv_reporter_generate_report(temp_output_dir, sample_summary):
 def test_markdown_reporter_initialization(temp_output_dir):
     """Test Markdown reporter initialization."""
     from actionsguard.reporters.markdown_reporter import MarkdownReporter
+
     reporter = MarkdownReporter(temp_output_dir)
     assert reporter.output_dir == Path(temp_output_dir)
 
@@ -292,6 +295,7 @@ def test_markdown_reporter_initialization(temp_output_dir):
 def test_markdown_reporter_get_extension():
     """Test Markdown reporter extension."""
     from actionsguard.reporters.markdown_reporter import MarkdownReporter
+
     reporter = MarkdownReporter("./test")
     assert reporter.get_extension() == ".md"
 
@@ -307,7 +311,7 @@ def test_markdown_reporter_generate_report(temp_output_dir, sample_summary):
     assert output_path.name == "test_report.md"
 
     # Read and validate markdown
-    with open(output_path, 'r', encoding='utf-8') as f:
+    with open(output_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     # Validate structure
@@ -328,12 +332,12 @@ def test_markdown_reporter_contains_executive_summary(temp_output_dir, sample_su
     reporter = MarkdownReporter(temp_output_dir)
     output_path = reporter.generate_report(sample_summary)
 
-    with open(output_path, 'r', encoding='utf-8') as f:
+    with open(output_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     # Should have executive summary section
     exec_summary = sample_summary.get_executive_summary()
-    assert any(key.replace('_', ' ').title() in content for key in exec_summary.keys())
+    assert any(key.replace("_", " ").title() in content for key in exec_summary.keys())
 
 
 # Integration Tests
@@ -354,7 +358,7 @@ def test_all_reporters_generate_successfully(temp_output_dir, sample_summary):
     mock_env = Mock()
     mock_env.get_template.return_value = mock_template
 
-    with patch('actionsguard.reporters.html_reporter.Environment', return_value=mock_env):
+    with patch("actionsguard.reporters.html_reporter.Environment", return_value=mock_env):
         reporters["html"] = HTMLReporter(temp_output_dir)
 
     # Generate all reports
@@ -411,7 +415,7 @@ def test_reporters_handle_empty_results(temp_output_dir):
     mock_env = Mock()
     mock_env.get_template.return_value = mock_template
 
-    with patch('actionsguard.reporters.html_reporter.Environment', return_value=mock_env):
+    with patch("actionsguard.reporters.html_reporter.Environment", return_value=mock_env):
         html_reporter = HTMLReporter(temp_output_dir)
         html_path = html_reporter.generate_report(empty_summary)
         assert html_path.exists()
@@ -445,7 +449,7 @@ def test_json_reporter_unicode_handling(temp_output_dir):
     output_path = reporter.generate_report(summary)
 
     # Should not raise encoding errors
-    with open(output_path, 'r', encoding='utf-8') as f:
+    with open(output_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
     # Unicode should be preserved

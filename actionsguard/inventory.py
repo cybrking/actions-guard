@@ -16,6 +16,7 @@ logger = logging.getLogger("actionsguard")
 @dataclass
 class InventoryEntry:
     """Single repository in inventory."""
+
     repo_name: str
     repo_url: str
     current_score: float
@@ -52,7 +53,7 @@ class Inventory:
             return {}
 
         try:
-            with open(self.inventory_path, 'r') as f:
+            with open(self.inventory_path, "r") as f:
                 data = json.load(f)
 
             # Convert to InventoryEntry objects
@@ -69,12 +70,9 @@ class Inventory:
         """Save inventory to file."""
         try:
             # Convert to dict for JSON serialization
-            data = {
-                repo_name: entry.to_dict()
-                for repo_name, entry in self.data.items()
-            }
+            data = {repo_name: entry.to_dict() for repo_name, entry in self.data.items()}
 
-            with open(self.inventory_path, 'w') as f:
+            with open(self.inventory_path, "w") as f:
                 json.dump(data, f, indent=2)
 
             logger.debug(f"Saved inventory to {self.inventory_path}")
@@ -120,11 +118,13 @@ class Inventory:
                 entry.scan_count += 1
 
                 # Add to history
-                entry.score_history.append({
-                    "date": now,
-                    "score": result.score,
-                    "risk": result.risk_level.value,
-                })
+                entry.score_history.append(
+                    {
+                        "date": now,
+                        "score": result.score,
+                        "risk": result.risk_level.value,
+                    }
+                )
 
                 # Update latest checks
                 entry.latest_checks = {
@@ -148,11 +148,13 @@ class Inventory:
                     first_seen=now,
                     last_updated=now,
                     scan_count=1,
-                    score_history=[{
-                        "date": now,
-                        "score": result.score,
-                        "risk": result.risk_level.value,
-                    }],
+                    score_history=[
+                        {
+                            "date": now,
+                            "score": result.score,
+                            "risk": result.risk_level.value,
+                        }
+                    ],
                     latest_checks={
                         check.name: {
                             "score": check.score,
@@ -218,15 +220,17 @@ class Inventory:
             current = entry.score_history[-1]
 
             if previous["score"] != current["score"]:
-                changes.append({
-                    "repo_name": entry.repo_name,
-                    "previous_score": previous["score"],
-                    "current_score": current["score"],
-                    "change": current["score"] - previous["score"],
-                    "previous_risk": previous["risk"],
-                    "current_risk": current["risk"],
-                    "date": current["date"],
-                })
+                changes.append(
+                    {
+                        "repo_name": entry.repo_name,
+                        "previous_score": previous["score"],
+                        "current_score": current["score"],
+                        "change": current["score"] - previous["score"],
+                        "previous_risk": previous["risk"],
+                        "current_risk": current["risk"],
+                        "date": current["date"],
+                    }
+                )
 
         # Sort by change (most improved first)
         changes.sort(key=lambda x: x["change"], reverse=True)

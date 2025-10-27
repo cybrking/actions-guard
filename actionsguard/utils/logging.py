@@ -50,12 +50,32 @@ class JSONFormatter(logging.Formatter):
         # Add any custom fields from extra dict
         for key, value in record.__dict__.items():
             if key not in [
-                "name", "msg", "args", "created", "filename", "funcName",
-                "levelname", "levelno", "lineno", "module", "msecs",
-                "message", "pathname", "process", "processName",
-                "relativeCreated", "thread", "threadName", "exc_info",
-                "exc_text", "stack_info", "getMessage", "repo_name",
-                "scan_id", "duration", "status_code"
+                "name",
+                "msg",
+                "args",
+                "created",
+                "filename",
+                "funcName",
+                "levelname",
+                "levelno",
+                "lineno",
+                "module",
+                "msecs",
+                "message",
+                "pathname",
+                "process",
+                "processName",
+                "relativeCreated",
+                "thread",
+                "threadName",
+                "exc_info",
+                "exc_text",
+                "stack_info",
+                "getMessage",
+                "repo_name",
+                "scan_id",
+                "duration",
+                "status_code",
             ]:
                 log_data[key] = value
 
@@ -66,7 +86,7 @@ def setup_logger(
     name: str = "actionsguard",
     level: int = logging.INFO,
     verbose: bool = False,
-    json_format: bool = False
+    json_format: bool = False,
 ) -> logging.Logger:
     """
     Set up logger with Rich or JSON formatting.
