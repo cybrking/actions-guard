@@ -107,9 +107,7 @@ class Scanner:
             metadata["has_workflows"] = True
 
             # Analyze workflows for detailed findings
-            workflows = self.workflow_analyzer.analyze_scorecard_results(
-                scorecard_data, checks
-            )
+            workflows = self.workflow_analyzer.analyze_scorecard_results(scorecard_data, checks)
 
             result = ScanResult(
                 repo_name=repo_name,
@@ -147,11 +145,7 @@ class Scanner:
             # Don't cache errors
             return result
 
-    def scan_repositories(
-        self,
-        repos: List[Repository],
-        parallel: bool = True
-    ) -> List[ScanResult]:
+    def scan_repositories(self, repos: List[Repository], parallel: bool = True) -> List[ScanResult]:
         """
         Scan multiple repositories.
 
@@ -195,8 +189,7 @@ class Scanner:
             # Original behavior without progress bar
             with ThreadPoolExecutor(max_workers=self.config.parallel_scans) as executor:
                 future_to_repo = {
-                    executor.submit(self.scan_repository, repo): repo
-                    for repo in repos
+                    executor.submit(self.scan_repository, repo): repo for repo in repos
                 }
 
                 for future in as_completed(future_to_repo):
@@ -228,14 +221,12 @@ class Scanner:
             TimeRemainingColumn(),
         ) as progress:
             task = progress.add_task(
-                f"[cyan]Scanning {len(repos)} repositories...",
-                total=len(repos)
+                f"[cyan]Scanning {len(repos)} repositories...", total=len(repos)
             )
 
             with ThreadPoolExecutor(max_workers=self.config.parallel_scans) as executor:
                 future_to_repo = {
-                    executor.submit(self.scan_repository, repo): repo
-                    for repo in repos
+                    executor.submit(self.scan_repository, repo): repo for repo in repos
                 }
 
                 for future in as_completed(future_to_repo):
@@ -255,7 +246,7 @@ class Scanner:
                         progress.update(
                             task,
                             advance=1,
-                            description=f"[cyan]✓ {repo.name} {risk_emoji} ({result.score:.1f}/10)"
+                            description=f"[cyan]✓ {repo.name} {risk_emoji} ({result.score:.1f}/10)",
                         )
 
                     except Exception as e:
@@ -270,11 +261,7 @@ class Scanner:
                                 error=str(e),
                             )
                         )
-                        progress.update(
-                            task,
-                            advance=1,
-                            description=f"[red]✗ {repo.name} (error)"
-                        )
+                        progress.update(task, advance=1, description=f"[red]✗ {repo.name} (error)")
 
         return results
 

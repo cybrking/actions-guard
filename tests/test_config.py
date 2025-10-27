@@ -11,7 +11,7 @@ from actionsguard.utils.config import Config
 @pytest.fixture
 def temp_config_file():
     """Create a temporary config file."""
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.yml', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".yml", delete=False) as f:
         yield f.name
     # Cleanup
     if os.path.exists(f.name):
@@ -43,7 +43,7 @@ def test_config_with_custom_values():
         fail_on_critical=True,
         verbose=True,
         parallel_scans=10,
-        use_cache=False
+        use_cache=False,
     )
 
     assert config.output_dir == "./custom-reports"
@@ -102,7 +102,7 @@ use_cache: false
 cache_ttl: 12
 """
 
-    with open(temp_config_file, 'w') as f:
+    with open(temp_config_file, "w") as f:
         f.write(yaml_content)
 
     config = Config.from_file(temp_config_file)
@@ -120,7 +120,7 @@ cache_ttl: 12
 
 def test_config_from_json_file():
     """Test loading config from JSON file."""
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         json_content = """{
   "output_dir": "./json-reports",
   "formats": ["json"],
@@ -155,7 +155,7 @@ def test_config_from_file_not_found():
 
 def test_config_from_file_invalid_format():
     """Test loading config from invalid file format."""
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
         f.write("some content")
         f.flush()
 
@@ -168,7 +168,7 @@ def test_config_from_file_invalid_format():
 
 def test_config_from_file_invalid_yaml():
     """Test loading config from invalid YAML."""
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.yml', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".yml", delete=False) as f:
         f.write("invalid: yaml: content::")
         f.flush()
 
@@ -181,7 +181,7 @@ def test_config_from_file_invalid_yaml():
 
 def test_config_from_file_invalid_json():
     """Test loading config from invalid JSON."""
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         f.write('{"invalid": json}')
         f.flush()
 
@@ -199,7 +199,7 @@ github_token: file_token
 output_dir: ./reports
 """
 
-    with open(temp_config_file, 'w') as f:
+    with open(temp_config_file, "w") as f:
         f.write(yaml_content)
 
     # Set environment variable
@@ -213,12 +213,7 @@ output_dir: ./reports
 
 def test_config_to_dict():
     """Test converting config to dictionary."""
-    config = Config(
-        output_dir="./test",
-        formats=["json"],
-        checks=["check1"],
-        fail_on_critical=True
-    )
+    config = Config(output_dir="./test", formats=["json"], checks=["check1"], fail_on_critical=True)
 
     config_dict = config.to_dict()
 
@@ -235,7 +230,7 @@ def test_config_from_dict():
         "formats": ["html"],
         "checks": ["check1", "check2"],
         "parallel_scans": 7,
-        "unknown_field": "should be ignored"
+        "unknown_field": "should be ignored",
     }
 
     config = Config.from_dict(data)
@@ -255,17 +250,18 @@ def test_config_to_file_yaml(temp_config_file):
         formats=["json", "html"],
         checks=["check1"],
         fail_on_critical=True,
-        github_token="should_not_save"  # Should not be saved
+        github_token="should_not_save",  # Should not be saved
     )
 
-    yaml_path = temp_config_file.replace('.yml', '_save.yml')
+    yaml_path = temp_config_file.replace(".yml", "_save.yml")
 
     try:
         config.to_file(yaml_path)
 
         # Load and verify
-        with open(yaml_path, 'r') as f:
+        with open(yaml_path, "r") as f:
             import yaml
+
             data = yaml.safe_load(f)
 
         assert data["output_dir"] == "./test-save"
@@ -280,21 +276,18 @@ def test_config_to_file_yaml(temp_config_file):
 
 def test_config_to_file_json():
     """Test saving config to JSON file."""
-    config = Config(
-        output_dir="./json-save",
-        formats=["json"],
-        github_token="should_not_save"
-    )
+    config = Config(output_dir="./json-save", formats=["json"], github_token="should_not_save")
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         json_path = f.name
 
     try:
         config.to_file(json_path)
 
         # Load and verify
-        with open(json_path, 'r') as f:
+        with open(json_path, "r") as f:
             import json
+
             data = json.load(f)
 
         assert data["output_dir"] == "./json-save"

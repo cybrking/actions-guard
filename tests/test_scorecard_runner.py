@@ -20,14 +20,8 @@ def sample_scorecard_output():
     """Create sample Scorecard JSON output."""
     return {
         "date": "2024-01-15",
-        "repo": {
-            "name": "github.com/owner/repo",
-            "commit": "abc123def456"
-        },
-        "scorecard": {
-            "version": "v4.13.1",
-            "commit": "xyz789"
-        },
+        "repo": {"name": "github.com/owner/repo", "commit": "abc123def456"},
+        "scorecard": {"version": "v4.13.1", "commit": "xyz789"},
         "score": 7.5,
         "checks": [
             {
@@ -36,9 +30,9 @@ def sample_scorecard_output():
                 "reason": "No dangerous workflow patterns found",
                 "documentation": {
                     "url": "https://github.com/ossf/scorecard/blob/main/docs/checks.md#dangerous-workflow",
-                    "short": "Determines if the project's GitHub Action workflows avoid dangerous patterns."
+                    "short": "Determines if the project's GitHub Action workflows avoid dangerous patterns.",
                 },
-                "details": []
+                "details": [],
             },
             {
                 "name": "Token-Permissions",
@@ -46,15 +40,15 @@ def sample_scorecard_output():
                 "reason": "non read-only tokens detected in GitHub workflows",
                 "documentation": {
                     "url": "https://github.com/ossf/scorecard/blob/main/docs/checks.md#token-permissions",
-                    "short": "Determines if the project's workflows follow the principle of least privilege."
+                    "short": "Determines if the project's workflows follow the principle of least privilege.",
                 },
                 "details": [
                     {
                         "msg": "no token permissions found",
                         "path": ".github/workflows/ci.yml",
-                        "type": "Warn"
+                        "type": "Warn",
                     }
-                ]
+                ],
             },
             {
                 "name": "Code-Review",
@@ -63,7 +57,7 @@ def sample_scorecard_output():
                 "documentation": {
                     "url": "https://github.com/ossf/scorecard/blob/main/docs/checks.md#code-review"
                 },
-                "details": []
+                "details": [],
             },
             {
                 "name": "Vulnerabilities",
@@ -72,9 +66,9 @@ def sample_scorecard_output():
                 "documentation": {
                     "url": "https://github.com/ossf/scorecard/blob/main/docs/checks.md#vulnerabilities"
                 },
-                "details": []
-            }
-        ]
+                "details": [],
+            },
+        ],
     }
 
 
@@ -86,14 +80,14 @@ def test_runner_initialization_no_check():
 
 def test_runner_initialization_with_check():
     """Test runner initialization with installation check."""
-    with patch('shutil.which', return_value='/usr/bin/scorecard'):
+    with patch("shutil.which", return_value="/usr/bin/scorecard"):
         runner = ScorecardRunner(timeout=300, check_install=True)
         assert runner.timeout == 300
 
 
 def test_runner_initialization_not_installed():
     """Test runner initialization when scorecard is not installed."""
-    with patch('shutil.which', return_value=None):
+    with patch("shutil.which", return_value=None):
         with pytest.raises(RuntimeError, match="OpenSSF Scorecard not found"):
             ScorecardRunner(timeout=300, check_install=True)
 
@@ -105,11 +99,11 @@ def test_run_scorecard_successful(runner, sample_scorecard_output):
     mock_result.stdout = json.dumps(sample_scorecard_output)
     mock_result.stderr = ""
 
-    with patch('subprocess.run', return_value=mock_result) as mock_run:
+    with patch("subprocess.run", return_value=mock_result) as mock_run:
         result = runner.run_scorecard(
             repo_url="https://github.com/owner/repo",
             checks=["Dangerous-Workflow", "Token-Permissions"],
-            github_token="ghp_test_token"
+            github_token="ghp_test_token",
         )
 
         assert result == sample_scorecard_output
@@ -125,9 +119,9 @@ def test_run_scorecard_successful(runner, sample_scorecard_output):
         assert "--checks=Token-Permissions" in cmd
 
         # Verify environment variables
-        env = call_args[1]['env']
-        assert env['GITHUB_TOKEN'] == "ghp_test_token"
-        assert env['GITHUB_AUTH_TOKEN'] == "ghp_test_token"
+        env = call_args[1]["env"]
+        assert env["GITHUB_TOKEN"] == "ghp_test_token"
+        assert env["GITHUB_AUTH_TOKEN"] == "ghp_test_token"
 
 
 def test_run_scorecard_all_checks(runner, sample_scorecard_output):
@@ -136,13 +130,13 @@ def test_run_scorecard_all_checks(runner, sample_scorecard_output):
     mock_result.returncode = 0
     mock_result.stdout = json.dumps(sample_scorecard_output)
 
-    with patch('subprocess.run', return_value=mock_result) as mock_run:
+    with patch("subprocess.run", return_value=mock_result) as mock_run:
         result = runner.run_scorecard(repo_url="owner/repo", checks=None)
 
         # Verify no --checks flag when running all checks
         call_args = mock_run.call_args
         cmd = call_args[0][0]
-        assert "--checks=" not in ' '.join(cmd)
+        assert "--checks=" not in " ".join(cmd)
 
 
 def test_run_scorecard_without_token(runner, sample_scorecard_output):
@@ -151,15 +145,16 @@ def test_run_scorecard_without_token(runner, sample_scorecard_output):
     mock_result.returncode = 0
     mock_result.stdout = json.dumps(sample_scorecard_output)
 
-    with patch('subprocess.run', return_value=mock_result) as mock_run:
+    with patch("subprocess.run", return_value=mock_result) as mock_run:
         runner.run_scorecard(repo_url="owner/repo", github_token=None)
 
         # Should not have GITHUB_TOKEN in additional env
         # (but will inherit from parent process)
         call_args = mock_run.call_args
-        env_additions = {k: v for k, v in call_args[1]['env'].items()
-                        if k not in subprocess.os.environ}
-        assert 'GITHUB_TOKEN' not in env_additions
+        env_additions = {
+            k: v for k, v in call_args[1]["env"].items() if k not in subprocess.os.environ
+        }
+        assert "GITHUB_TOKEN" not in env_additions
 
 
 def test_run_scorecard_execution_failure(runner):
@@ -169,14 +164,14 @@ def test_run_scorecard_execution_failure(runner):
     mock_result.stdout = ""
     mock_result.stderr = "Error: repository not found"
 
-    with patch('subprocess.run', return_value=mock_result):
+    with patch("subprocess.run", return_value=mock_result):
         with pytest.raises(RuntimeError, match="Scorecard execution failed"):
             runner.run_scorecard(repo_url="owner/nonexistent")
 
 
 def test_run_scorecard_timeout(runner):
     """Test scorecard timeout."""
-    with patch('subprocess.run', side_effect=subprocess.TimeoutExpired('scorecard', 300)):
+    with patch("subprocess.run", side_effect=subprocess.TimeoutExpired("scorecard", 300)):
         with pytest.raises(TimeoutError, match="timed out after 300 seconds"):
             runner.run_scorecard(repo_url="owner/repo")
 
@@ -187,7 +182,7 @@ def test_run_scorecard_invalid_json(runner):
     mock_result.returncode = 0
     mock_result.stdout = "Not valid JSON"
 
-    with patch('subprocess.run', return_value=mock_result):
+    with patch("subprocess.run", return_value=mock_result):
         with pytest.raises(RuntimeError, match="Failed to parse scorecard output"):
             runner.run_scorecard(repo_url="owner/repo")
 
@@ -294,14 +289,8 @@ def test_parse_results_with_details(runner):
                 "name": "Test-Check",
                 "score": 5,
                 "reason": "Some issues found",
-                "documentation": {
-                    "url": "https://example.com",
-                    "short": "Short description"
-                },
-                "details": [
-                    {"msg": "Issue 1", "type": "Warn"},
-                    {"msg": "Issue 2", "type": "Info"}
-                ]
+                "documentation": {"url": "https://example.com", "short": "Short description"},
+                "details": [{"msg": "Issue 1", "type": "Warn"}, {"msg": "Issue 2", "type": "Info"}],
             }
         ]
     }
@@ -358,10 +347,7 @@ def test_get_metadata_missing_fields(runner):
 
 def test_get_metadata_partial_data(runner):
     """Test extracting metadata with partial data."""
-    partial_data = {
-        "scorecard": {"version": "v4.0.0"},
-        "repo": {"name": "test/repo"}
-    }
+    partial_data = {"scorecard": {"version": "v4.0.0"}, "repo": {"name": "test/repo"}}
 
     metadata = runner.get_metadata(partial_data)
 
@@ -406,11 +392,11 @@ def test_run_scorecard_command_construction(runner):
     mock_result.returncode = 0
     mock_result.stdout = '{"score": 5.0, "checks": []}'
 
-    with patch('subprocess.run', return_value=mock_result) as mock_run:
+    with patch("subprocess.run", return_value=mock_result) as mock_run:
         runner.run_scorecard(
             repo_url="github.com/test/repo",
             checks=["Check1", "Check2", "Check3"],
-            github_token="token123"
+            github_token="token123",
         )
 
         cmd = mock_run.call_args[0][0]
@@ -431,11 +417,11 @@ def test_runner_timeout_parameter(runner):
     mock_result.returncode = 0
     mock_result.stdout = '{"score": 5.0, "checks": []}'
 
-    with patch('subprocess.run', return_value=mock_result) as mock_run:
+    with patch("subprocess.run", return_value=mock_result) as mock_run:
         runner.run_scorecard(repo_url="test/repo")
 
         # Verify timeout was passed
-        assert mock_run.call_args[1]['timeout'] == 300
+        assert mock_run.call_args[1]["timeout"] == 300
 
 
 def test_custom_timeout():
@@ -446,8 +432,8 @@ def test_custom_timeout():
     mock_result.returncode = 0
     mock_result.stdout = '{"score": 5.0, "checks": []}'
 
-    with patch('subprocess.run', return_value=mock_result) as mock_run:
+    with patch("subprocess.run", return_value=mock_result) as mock_run:
         runner.run_scorecard(repo_url="test/repo")
 
         # Verify custom timeout was used
-        assert mock_run.call_args[1]['timeout'] == 600
+        assert mock_run.call_args[1]["timeout"] == 600

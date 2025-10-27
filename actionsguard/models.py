@@ -270,12 +270,14 @@ class ScanSummary:
         top_issues = []
         for issue_name, data in issue_types.items():
             if data["count"] > 0:
-                top_issues.append({
-                    "name": issue_name,
-                    "instances": data["count"],
-                    "repos_affected": len(data["repos_affected"]),
-                    "severity": data["max_severity"].value,
-                })
+                top_issues.append(
+                    {
+                        "name": issue_name,
+                        "instances": data["count"],
+                        "repos_affected": len(data["repos_affected"]),
+                        "severity": data["max_severity"].value,
+                    }
+                )
 
         top_issues.sort(key=lambda x: (x["instances"], x["repos_affected"]), reverse=True)
 
@@ -325,7 +327,9 @@ class ScanSummary:
         }
 
     @staticmethod
-    def from_results(results: List[ScanResult], scan_duration: Optional[float] = None) -> "ScanSummary":
+    def from_results(
+        results: List[ScanResult], scan_duration: Optional[float] = None
+    ) -> "ScanSummary":
         """
         Create summary from list of scan results.
 
@@ -339,11 +343,7 @@ class ScanSummary:
         successful = [r for r in results if r.error is None]
         failed = [r for r in results if r.error is not None]
 
-        avg_score = (
-            sum(r.score for r in successful) / len(successful)
-            if successful
-            else 0.0
-        )
+        avg_score = sum(r.score for r in successful) / len(successful) if successful else 0.0
 
         # Count severity across all checks
         critical = 0

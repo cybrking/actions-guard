@@ -17,7 +17,7 @@ def retry_with_backoff(
     max_retries: int = 3,
     base_delay: float = 1.0,
     max_delay: float = 60.0,
-    exponential_base: float = 2.0
+    exponential_base: float = 2.0,
 ):
     """
     Decorator for retrying functions with exponential backoff.
@@ -31,6 +31,7 @@ def retry_with_backoff(
     Returns:
         Decorated function with retry logic
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
@@ -48,8 +49,8 @@ def retry_with_backoff(
                         raise
 
                     # Get self from args if this is a method
-                    self_obj = args[0] if args and hasattr(args[0], 'github') else None
-                    if self_obj and hasattr(self_obj, 'github'):
+                    self_obj = args[0] if args and hasattr(args[0], "github") else None
+                    if self_obj and hasattr(self_obj, "github"):
                         rate_limit = self_obj.github.get_rate_limit()
                         reset_time = rate_limit.core.reset
                         sleep_time = min((reset_time - time.time()) + 10, max_delay)
@@ -82,7 +83,7 @@ def retry_with_backoff(
                         retries += 1
                         delay = min(delay * exponential_base, max_delay)
 
-                    elif e.status == 403 and 'rate limit' in str(e).lower():
+                    elif e.status == 403 and "rate limit" in str(e).lower():
                         # Secondary rate limit or abuse detection
                         if retries >= max_retries:
                             logger.error("Secondary rate limit exceeded. Max retries reached.")
@@ -118,6 +119,7 @@ def retry_with_backoff(
             raise Exception(f"Max retries ({max_retries}) exceeded")
 
         return wrapper
+
     return decorator
 
 
@@ -155,10 +157,7 @@ class GitHubClient:
             raise
 
     def get_organization_repos(
-        self,
-        org_name: str,
-        exclude: Optional[List[str]] = None,
-        only: Optional[List[str]] = None
+        self, org_name: str, exclude: Optional[List[str]] = None, only: Optional[List[str]] = None
     ) -> List[Repository]:
         """
         Get repositories from an organization with filtering.
@@ -219,7 +218,7 @@ class GitHubClient:
         username: Optional[str] = None,
         exclude: Optional[List[str]] = None,
         only: Optional[List[str]] = None,
-        include_forks: bool = False
+        include_forks: bool = False,
     ) -> List[Repository]:
         """
         Get repositories from a user account with filtering.
@@ -246,7 +245,9 @@ class GitHubClient:
             if username:
                 # Check if username is the authenticated user
                 if username.lower() == auth_user.login.lower():
-                    logger.info(f"Fetching repositories from authenticated user: {username} (using authenticated endpoint)")
+                    logger.info(
+                        f"Fetching repositories from authenticated user: {username} (using authenticated endpoint)"
+                    )
                     user = auth_user
                 else:
                     logger.info(f"Fetching repositories from user: {username}")
@@ -302,9 +303,7 @@ class GitHubClient:
                     "Check the username and ensure the account exists."
                 )
             elif e.status == 403:
-                raise ValueError(
-                    f"No permission to access user '{username}' repositories."
-                )
+                raise ValueError(f"No permission to access user '{username}' repositories.")
             raise
 
     @retry_with_backoff(max_retries=3, base_delay=1.0, max_delay=30.0)
@@ -333,9 +332,7 @@ class GitHubClient:
                     "Check the name and ensure you have access."
                 )
             elif e.status == 403:
-                raise ValueError(
-                    f"No permission to access repository '{repo_full_name}'."
-                )
+                raise ValueError(f"No permission to access repository '{repo_full_name}'.")
             raise
 
     def check_rate_limit(self) -> None:
@@ -344,22 +341,16 @@ class GitHubClient:
         core = rate_limit.core
 
         logger.debug(
-            f"GitHub API rate limit: {core.remaining}/{core.limit} "
-            f"(resets at {core.reset})"
+            f"GitHub API rate limit: {core.remaining}/{core.limit} " f"(resets at {core.reset})"
         )
 
         if core.remaining < 100:
             logger.warning(
-                f"Low rate limit: {core.remaining} requests remaining. "
-                f"Resets at {core.reset}"
+                f"Low rate limit: {core.remaining} requests remaining. " f"Resets at {core.reset}"
             )
 
     def _paginate_with_retry(
-        self,
-        method,
-        max_retries: int = 3,
-        base_delay: float = 1.0,
-        max_delay: float = 60.0
+        self, method, max_retries: int = 3, base_delay: float = 1.0, max_delay: float = 60.0
     ):
         """
         Paginate through GitHub API results with exponential backoff retry.
