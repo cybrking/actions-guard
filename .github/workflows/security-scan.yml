@@ -39,7 +39,7 @@ jobs:
           actionsguard scan --repo ${{ github.repository }} --output ./reports --format html,json,markdown
 
       - name: Upload scan reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: security-reports
           path: reports/
