@@ -508,12 +508,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Click](https://click.palletsprojects.com/) - CLI framework
 - [Rich](https://github.com/Textualize/rich) - Terminal formatting
 
-## Support
-
-- **Documentation**: [GitHub Wiki](https://github.com/your-username/actionsguard/wiki)
-- **Issues**: [GitHub Issues](https://github.com/your-username/actionsguard/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-username/actionsguard/discussions)
-
 ## Roadmap
 
 - [ ] SARIF output for GitHub Security tab
