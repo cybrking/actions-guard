@@ -9,6 +9,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  workflows: write
 
 jobs:
   auto-merge:
@@ -24,11 +25,11 @@ jobs:
         run: |
           echo "Enabling auto-merge for PR #$PR_NUMBER from branch ${{ github.head_ref }}"
 
-          # Enable auto-merge with squash strategy
+          # Enable auto-merge with merge commit strategy
           gh pr merge $PR_NUMBER \
             --repo ${{ github.repository }} \
             --auto \
-            --squash \
+            --merge \
             --delete-branch
 
           echo "✅ Auto-merge enabled. PR will merge automatically when all checks pass."
