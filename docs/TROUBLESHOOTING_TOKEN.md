@@ -250,7 +250,7 @@ You might have an older version. Try:
 ```bash
 cd actions-guard
 git pull origin main
-pip install -e . --force-reinstall
+pip3 install . --force-reinstall
 ```
 
 ---

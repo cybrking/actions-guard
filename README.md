@@ -78,7 +78,7 @@ scorecard version
 
 ### Install ActionsGuard
 
-#### Development Installation (Current Method)
+#### Install from Source (Current Method)
 
 Since ActionsGuard is not yet published to PyPI, install from source:
 
@@ -88,14 +88,11 @@ git clone https://github.com/cybrking/actions-guard.git
 cd actions-guard
 
 # Create virtual environment (recommended)
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install dependencies
-pip install -r requirements.txt
-
-# Install ActionsGuard in development mode
-pip install -e .
+# Install ActionsGuard
+pip3 install .
 
 # Verify installation
 actionsguard --version
@@ -104,7 +101,7 @@ actionsguard --version
 #### Future: Via pip (After PyPI Publication)
 
 ```bash
-pip install actionsguard
+pip3 install actionsguard
 ```
 
 ## Quick Start
@@ -348,11 +345,11 @@ git clone https://github.com/cybrking/actions-guard.git
 cd actions-guard
 
 # Create virtual environment
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install development dependencies
-pip install -e ".[dev]"
+pip3 install -e ".[dev]"
 ```
 
 ### Running Tests
@@ -381,7 +378,7 @@ mypy actionsguard/
 ```yaml
 - name: Security Scan
   run: |
-    pip install actionsguard
+    pip3 install actionsguard
     actionsguard scan --org ${{ github.repository_owner }} --fail-on-critical
 ```
 
@@ -390,7 +387,7 @@ mypy actionsguard/
 ```yaml
 security_scan:
   script:
-    - pip install actionsguard
+    - pip3 install actionsguard
     - actionsguard scan --org my-org --fail-on-critical
   artifacts:
     paths:
@@ -402,7 +399,7 @@ security_scan:
 ```groovy
 stage('Security Scan') {
     steps {
-        sh 'pip install actionsguard'
+        sh 'pip3 install actionsguard'
         sh 'actionsguard scan --org my-org --fail-on-critical'
         publishHTML([
             reportDir: 'reports',
@@ -452,7 +449,7 @@ ERROR: Could not find a version that satisfies the requirement actionsguard
 ```bash
 git clone https://github.com/cybrking/actions-guard.git
 cd actions-guard
-pip install -e .
+pip3 install .
 ```
 
 **3. GitHub API Rate Limit**
@@ -487,7 +484,7 @@ ERROR: file:///path does not appear to be a Python project
 
 ```bash
 cd actions-guard  # Navigate to the cloned repository
-pip install -e .
+pip3 install .
 ```
 
 ## Contributing

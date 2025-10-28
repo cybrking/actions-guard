@@ -37,7 +37,7 @@ scorecard --repo=github.com/your-org/repo2 --format=json > repo2.json
 
 ```bash
 # Install ActionsGuard
-pip install -e .
+pip3 install actionsguard
 
 # Import and generate reports
 actionsguard import-scorecard kubernetes.json
@@ -170,7 +170,7 @@ jobs:
 
       - name: Generate Reports
         run: |
-          pip install actionsguard
+          pip3 install actionsguard
           actionsguard import-scorecard scorecard.json
 
       - name: Upload Reports
@@ -198,7 +198,7 @@ security_scan:
     - go install github.com/ossf/scorecard/v5/cmd/scorecard@latest
     - export PATH=$PATH:$(go env GOPATH)/bin
     - scorecard --repo=github.com/your-org/your-repo --format=json > scorecard.json
-    - pip install actionsguard
+    - pip3 install actionsguard
     - actionsguard import-scorecard scorecard.json
   artifacts:
     paths:

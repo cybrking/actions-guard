@@ -78,11 +78,11 @@ source venv/bin/activate
 # venv\Scripts\activate
 ```
 
-### Install Dependencies
+### Install ActionsGuard
 
 ```bash
-# Install ActionsGuard and dependencies
-pip install -e .
+# Install ActionsGuard
+pip3 install .
 
 # Verify installation
 actionsguard --version
