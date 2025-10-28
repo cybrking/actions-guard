@@ -20,11 +20,11 @@ pip3 install actionsguard
 # Check if Scorecard is installed
 if ! command -v scorecard &> /dev/null; then
     echo "Warning: OpenSSF Scorecard is not installed"
-    echo "Install it with:"
-    echo "  curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_linux_amd64"
-    echo "  chmod +x scorecard"
-    echo "  sudo mv scorecard /usr/local/bin/"
-    echo "Download from: https://github.com/ossf/scorecard/releases"
+    echo "Install it with Homebrew:"
+    echo "  brew install scorecard"
+    echo ""
+    echo "Don't have Homebrew? Install it first:"
+    echo "  https://brew.sh"
 fi
 
 echo "ActionsGuard installed successfully!"
