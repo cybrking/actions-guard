@@ -38,8 +38,10 @@ class ScorecardRunner:
         if not shutil.which("scorecard"):
             raise RuntimeError(
                 "OpenSSF Scorecard not found. Install it with:\n"
-                "  go install github.com/ossf/scorecard/v5/cmd/scorecard@latest\n"
-                "Or download from: https://github.com/ossf/scorecard/releases"
+                "  curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_linux_amd64\n"
+                "  chmod +x scorecard\n"
+                "  sudo mv scorecard /usr/local/bin/\n"
+                "Download from: https://github.com/ossf/scorecard/releases"
             )
         logger.debug("Scorecard CLI found")
 

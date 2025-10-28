@@ -14,8 +14,16 @@ Use ActionsGuard to generate beautiful reports from existing Scorecard scans!
 ### Step 1: Run Scorecard Yourself
 
 ```bash
-# Install Scorecard (any way that works for you)
-go install github.com/ossf/scorecard/v4/cmd/scorecard@latest
+# Install Scorecard
+# For Linux:
+curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_linux_amd64
+chmod +x scorecard
+sudo mv scorecard /usr/local/bin/
+
+# For macOS (Apple Silicon):
+# curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_darwin_arm64
+# chmod +x scorecard
+# sudo mv scorecard /usr/local/bin/
 
 # Scan a repository and save JSON
 scorecard --repo=github.com/kubernetes/kubernetes --format=json > kubernetes.json
@@ -147,8 +155,8 @@ jobs:
     steps:
       - name: Install Scorecard
         run: |
-          go install github.com/ossf/scorecard/v4/cmd/scorecard@latest
-          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+          curl -L -o /usr/local/bin/scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_linux_amd64
+          chmod +x /usr/local/bin/scorecard
 
       - name: Scan Repository
         run: |
@@ -183,8 +191,8 @@ jobs:
 security_scan:
   stage: test
   script:
-    - go install github.com/ossf/scorecard/v4/cmd/scorecard@latest
-    - export PATH=$PATH:$(go env GOPATH)/bin
+    - curl -L -o /usr/local/bin/scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_linux_amd64
+    - chmod +x /usr/local/bin/scorecard
     - scorecard --repo=github.com/your-org/your-repo --format=json > scorecard.json
     - pip install actionsguard
     - actionsguard import-scorecard scorecard.json
