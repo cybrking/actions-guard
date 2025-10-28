@@ -20,13 +20,14 @@ setup(
     description="GitHub Actions security scanner using OpenSSF Scorecard",
     long_description=long_description,
     long_description_content_type="text/markdown",
+    license="MIT",
     author="Travis Felder",
-    author_email="your.email@example.com",
-    url="https://github.com/your-username/actionsguard",
+    author_email="travis@cybrking.com",
+    url="https://github.com/cybrking/actions-guard",
     project_urls={
-        "Bug Tracker": "https://github.com/your-username/actionsguard/issues",
-        "Documentation": "https://github.com/your-username/actionsguard#readme",
-        "Source Code": "https://github.com/your-username/actionsguard",
+        "Bug Tracker": "https://github.com/cybrking/actions-guard/issues",
+        "Documentation": "https://github.com/cybrking/actions-guard#readme",
+        "Source Code": "https://github.com/cybrking/actions-guard",
     },
     packages=find_packages(exclude=["tests", "tests.*"]),
     package_data={
@@ -40,6 +41,7 @@ setup(
         "rich>=13.0.0",
         "jinja2>=3.1.0",
         "requests>=2.31.0",
+        "pyyaml>=6.0",
     ],
     extras_require={
         "dev": [
@@ -63,7 +65,6 @@ setup(
         "Intended Audience :: System Administrators",
         "Topic :: Security",
         "Topic :: Software Development :: Quality Assurance",
-        "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",

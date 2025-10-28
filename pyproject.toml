@@ -1,16 +1,16 @@
 [build-system]
-requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "actionsguard"
-dynamic = ["version"]
+version = "1.0.0"
 description = "GitHub Actions security scanner using OpenSSF Scorecard"
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
-    {name = "Travis Felder", email = "your.email@example.com"}
+    {name = "Travis Felder", email = "travis@cybrking.com"}
 ]
 keywords = ["github", "actions", "security", "scanner", "ossf", "scorecard"]
 classifiers = [
@@ -18,13 +18,14 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "Topic :: Security",
-    "License :: OSI Approved :: MIT License",
+    "Topic :: Software Development :: Quality Assurance",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
 ]
 dependencies = [
     "PyGithub>=2.1.1",
@@ -32,6 +33,7 @@ dependencies = [
     "rich>=13.0.0",
     "jinja2>=3.1.0",
     "requests>=2.31.0",
+    "pyyaml>=6.0",
 ]
 
 [project.optional-dependencies]
@@ -49,13 +51,13 @@ dev = [
 actionsguard = "actionsguard.cli:cli"
 
 [project.urls]
-Homepage = "https://github.com/your-username/actionsguard"
-Documentation = "https://github.com/your-username/actionsguard#readme"
-Repository = "https://github.com/your-username/actionsguard"
-"Bug Tracker" = "https://github.com/your-username/actionsguard/issues"
+Homepage = "https://github.com/cybrking/actions-guard"
+Documentation = "https://github.com/cybrking/actions-guard#readme"
+Repository = "https://github.com/cybrking/actions-guard"
+"Bug Tracker" = "https://github.com/cybrking/actions-guard/issues"
 
-[tool.setuptools.dynamic]
-version = {attr = "actionsguard.__version__.__version__"}
+[tool.setuptools.packages.find]
+exclude = ["tests", "tests.*"]
 
 [tool.setuptools.package-data]
 actionsguard = ["templates/*.html"]
