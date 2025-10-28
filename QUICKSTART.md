@@ -4,7 +4,29 @@ This guide will help you install and run ActionsGuard in under 5 minutes.
 
 ## Step 1: Install OpenSSF Scorecard
 
-### For macOS Users
+### Recommended: Using Homebrew (macOS & Linux)
+
+The easiest way to install scorecard is with Homebrew:
+
+```bash
+brew install scorecard
+```
+
+**Don't have Homebrew?** Install it first from https://brew.sh
+
+**Verify Installation:**
+
+```bash
+scorecard version
+# Should output something like: scorecard version: v5.x.x
+```
+
+### Alternative: Manual Installation
+
+<details>
+<summary>Click to expand manual installation instructions</summary>
+
+#### For macOS Users
 
 ```bash
 # For Apple Silicon (M1/M2/M3)
@@ -18,14 +40,7 @@ chmod +x scorecard
 sudo mv scorecard /usr/local/bin/
 ```
 
-**Verify Installation:**
-
-```bash
-scorecard version
-# Should output something like: scorecard version: v5.x.x
-```
-
-### For Linux Users
+#### For Linux Users
 
 ```bash
 # Download binary
@@ -37,7 +52,7 @@ sudo mv scorecard /usr/local/bin/
 scorecard version
 ```
 
-### For Windows Users
+#### For Windows Users
 
 Download the binary from: https://github.com/ossf/scorecard/releases/latest
 
@@ -45,6 +60,8 @@ Extract and add to PATH, then verify:
 ```cmd
 scorecard version
 ```
+
+</details>
 
 ---
 
@@ -265,7 +282,10 @@ actionsguard scan --repo my-org/critical-app \
 # Check if scorecard is in PATH
 which scorecard
 
-# If not found, reinstall and verify
+# If not found, install with Homebrew
+brew install scorecard
+
+# Verify installation
 scorecard version
 ```
 

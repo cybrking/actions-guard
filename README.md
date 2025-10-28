@@ -31,7 +31,18 @@ ActionsGuard leverages [OpenSSF Scorecard](https://github.com/ossf/scorecard) to
 
 **Important**: ActionsGuard requires [OpenSSF Scorecard](https://github.com/ossf/scorecard) to be installed first.
 
-#### Download Scorecard Binary
+#### Install Scorecard
+
+**Recommended: Using Homebrew (macOS & Linux)**
+
+```bash
+brew install scorecard
+```
+
+**Alternative: Download Binary Manually**
+
+<details>
+<summary>Click to expand manual installation instructions</summary>
 
 ```bash
 # macOS (Apple Silicon)
@@ -50,7 +61,10 @@ chmod +x scorecard
 sudo mv scorecard /usr/local/bin/scorecard
 ```
 
-Verify installation:
+</details>
+
+**Verify Installation:**
+
 ```bash
 scorecard version
 ```
@@ -406,15 +420,16 @@ For detailed troubleshooting guides, see:
 Error: OpenSSF Scorecard not found
 ```
 
-**Solution**: Download the scorecard binary directly:
+**Solution**: Install scorecard using Homebrew:
 
 ```bash
-# See installation instructions above for your platform
-# Example for Linux:
-curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_linux_amd64
-chmod +x scorecard
-sudo mv scorecard /usr/local/bin/scorecard
+brew install scorecard
+
+# Verify installation
+scorecard version
 ```
+
+If you don't have Homebrew, install it from https://brew.sh or see the manual installation instructions in the Prerequisites section above.
 
 **2. ActionsGuard Not Found on PyPI**
 
