@@ -178,7 +178,7 @@ actionsguard scan --repo kubernetes/kubernetes
 actionsguard scan --org my-org
 
 # Scan a user account (personal repos)
-actionsguard scan --user cybrking
+actionsguard scan --user your-user
 
 # Scan with custom token
 actionsguard scan --repo owner/repo --token ghp_xxxxxxxxxxxx
@@ -189,11 +189,11 @@ actionsguard scan --repo owner/repo --token ghp_xxxxxxxxxxxx
 ```bash
 # Exclude specific repositories
 actionsguard scan --org my-org --exclude repo1,repo2
-actionsguard scan --user cybrking --exclude forked-repo
+actionsguard scan --user your-user --exclude forked-repo
 
 # Only scan specific repositories
 actionsguard scan --org my-org --only important-repo,critical-repo
-actionsguard scan --user cybrking --only my-critical-project
+actionsguard scan --user your-user --only my-critical-project
 
 # Run specific security checks
 actionsguard scan --org my-org --checks Dangerous-Workflow,Token-Permissions
