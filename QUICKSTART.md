@@ -4,34 +4,40 @@ This guide will help you install and run ActionsGuard in under 5 minutes.
 
 ## Step 1: Install OpenSSF Scorecard
 
-### For macOS Users
+### For macOS or Linux Users
+
+**Option 1: Homebrew (Easiest)**
 
 ```bash
-# For Apple Silicon (M1/M2/M3)
-curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_darwin_arm64
-chmod +x scorecard
-sudo mv scorecard /usr/local/bin/
+# Install scorecard via Homebrew
+brew install scorecard
 
-# For Intel Macs
-curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_darwin_amd64
-chmod +x scorecard
-sudo mv scorecard /usr/local/bin/
-```
-
-**Verify Installation:**
-
-```bash
+# Verify installation
 scorecard version
 # Should output something like: scorecard version: v5.x.x
 ```
 
-### For Linux Users
+**Option 2: Docker**
 
 ```bash
-# Download binary
-curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_linux_amd64
-chmod +x scorecard
-sudo mv scorecard /usr/local/bin/
+# Pull the official Docker image
+docker pull gcr.io/openssf/scorecard:stable
+
+# You can use Docker to run scorecard without local installation
+# (See Docker usage examples later in this guide)
+```
+
+**Option 3: Go Install**
+
+```bash
+# If you have Go 1.21+ installed
+go install github.com/ossf/scorecard/v5/cmd/scorecard@latest
+
+# Add to PATH (add this to your ~/.zshrc or ~/.bash_profile)
+export PATH=$PATH:$(go env GOPATH)/bin
+
+# Reload your shell
+source ~/.zshrc  # or source ~/.bash_profile
 
 # Verify
 scorecard version

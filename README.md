@@ -31,23 +31,44 @@ ActionsGuard leverages [OpenSSF Scorecard](https://github.com/ossf/scorecard) to
 
 **Important**: ActionsGuard requires [OpenSSF Scorecard](https://github.com/ossf/scorecard) to be installed first.
 
-#### Download Scorecard Binary
+#### Option 1: Homebrew (Recommended)
 
 ```bash
-# macOS (Apple Silicon)
-curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_darwin_arm64
-chmod +x scorecard
-sudo mv scorecard /usr/local/bin/scorecard
+# macOS or Linux (with Homebrew installed)
+brew install scorecard
+```
 
-# macOS (Intel)
-curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_darwin_amd64
-chmod +x scorecard
-sudo mv scorecard /usr/local/bin/scorecard
+#### Option 2: Docker
 
-# Linux
-curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_linux_amd64
-chmod +x scorecard
-sudo mv scorecard /usr/local/bin/scorecard
+```bash
+# Use the official Docker image
+docker pull gcr.io/openssf/scorecard:stable
+
+# Run scorecard via Docker
+docker run -e GITHUB_AUTH_TOKEN=token gcr.io/openssf/scorecard:stable \
+  --show-details --repo=https://github.com/owner/repo
+```
+
+#### Option 3: Go Install
+
+```bash
+# If you have Go 1.21+ installed
+go install github.com/ossf/scorecard/v5/cmd/scorecard@latest
+
+# Make sure $GOPATH/bin is in your PATH
+export PATH=$PATH:$(go env GOPATH)/bin
+```
+
+#### Option 4: Download Binary (Manual)
+
+```bash
+# Download from releases page
+# Visit: https://github.com/ossf/scorecard/releases/latest
+# Download the appropriate tar.gz for your platform
+# Example for Linux:
+curl -LO https://github.com/ossf/scorecard/releases/download/v5.3.0/scorecard_5.3.0_linux_amd64.tar.gz
+tar -xzf scorecard_5.3.0_linux_amd64.tar.gz
+sudo mv scorecard /usr/local/bin/
 ```
 
 Verify installation:
@@ -406,14 +427,18 @@ For detailed troubleshooting guides, see:
 Error: OpenSSF Scorecard not found
 ```
 
-**Solution**: Download the scorecard binary directly:
+**Solution**: Install scorecard using one of the recommended methods:
 
 ```bash
-# See installation instructions above for your platform
-# Example for Linux:
-curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_linux_amd64
-chmod +x scorecard
-sudo mv scorecard /usr/local/bin/scorecard
+# Easiest: Use Homebrew (macOS or Linux)
+brew install scorecard
+
+# Or use Docker
+docker pull gcr.io/openssf/scorecard:stable
+
+# Or use Go (if you have Go installed)
+go install github.com/ossf/scorecard/v5/cmd/scorecard@latest
+export PATH=$PATH:$(go env GOPATH)/bin
 ```
 
 **2. ActionsGuard Not Found on PyPI**

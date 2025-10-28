@@ -1,16 +1,20 @@
 # Dockerfile for ActionsGuard GitHub Action
 
+# Stage 1: Build Scorecard
+FROM golang:1.21-alpine AS scorecard-builder
+RUN apk add --no-cache git
+RUN go install github.com/ossf/scorecard/v5/cmd/scorecard@latest
+
+# Stage 2: Build ActionsGuard
 FROM python:3.11-slim
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Download Scorecard binary
-RUN curl -L -o /usr/local/bin/scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_linux_amd64 \
-    && chmod +x /usr/local/bin/scorecard
+# Copy Scorecard from builder
+COPY --from=scorecard-builder /go/bin/scorecard /usr/local/bin/scorecard
 
 # Set working directory
 WORKDIR /app
