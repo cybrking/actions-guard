@@ -6,45 +6,30 @@ This guide will help you install and run ActionsGuard in under 5 minutes.
 
 ### For macOS Users
 
-**Option A: Using curl (Recommended)**
-
 ```bash
 # For Apple Silicon (M1/M2/M3)
-curl -Lo scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_darwin_arm64
+curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_darwin_arm64
 chmod +x scorecard
 sudo mv scorecard /usr/local/bin/
 
 # For Intel Macs
-curl -Lo scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_darwin_amd64
+curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_darwin_amd64
 chmod +x scorecard
 sudo mv scorecard /usr/local/bin/
-```
-
-**Option B: Using Go**
-
-```bash
-# IMPORTANT: Use v4, not v5!
-go install github.com/ossf/scorecard/v4/cmd/scorecard@latest
-
-# Add to PATH (add this to your ~/.zshrc or ~/.bash_profile)
-export PATH=$PATH:$(go env GOPATH)/bin
-
-# Reload your shell
-source ~/.zshrc  # or source ~/.bash_profile
 ```
 
 **Verify Installation:**
 
 ```bash
 scorecard version
-# Should output something like: scorecard version: v4.x.x
+# Should output something like: scorecard version: v5.x.x
 ```
 
 ### For Linux Users
 
 ```bash
 # Download binary
-curl -Lo scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_linux_amd64
+curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_linux_amd64
 chmod +x scorecard
 sudo mv scorecard /usr/local/bin/
 

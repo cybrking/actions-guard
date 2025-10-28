@@ -21,8 +21,10 @@ pip3 install actionsguard
 if ! command -v scorecard &> /dev/null; then
     echo "Warning: OpenSSF Scorecard is not installed"
     echo "Install it with:"
-    echo "  go install github.com/ossf/scorecard/v5/cmd/scorecard@latest"
-    echo "Or download from: https://github.com/ossf/scorecard/releases"
+    echo "  curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_linux_amd64"
+    echo "  chmod +x scorecard"
+    echo "  sudo mv scorecard /usr/local/bin/"
+    echo "Download from: https://github.com/ossf/scorecard/releases"
 fi
 
 echo "ActionsGuard installed successfully!"

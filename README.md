@@ -31,33 +31,23 @@ ActionsGuard leverages [OpenSSF Scorecard](https://github.com/ossf/scorecard) to
 
 **Important**: ActionsGuard requires [OpenSSF Scorecard](https://github.com/ossf/scorecard) to be installed first.
 
-#### Option 1: Download Scorecard Binary (Recommended)
+#### Download Scorecard Binary
 
 ```bash
 # macOS (Apple Silicon)
-wget https://github.com/ossf/scorecard/releases/latest/download/scorecard_darwin_arm64
-chmod +x scorecard_darwin_arm64
-sudo mv scorecard_darwin_arm64 /usr/local/bin/scorecard
+curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_darwin_arm64
+chmod +x scorecard
+sudo mv scorecard /usr/local/bin/scorecard
 
 # macOS (Intel)
-wget https://github.com/ossf/scorecard/releases/latest/download/scorecard_darwin_amd64
-chmod +x scorecard_darwin_amd64
-sudo mv scorecard_darwin_amd64 /usr/local/bin/scorecard
+curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_darwin_amd64
+chmod +x scorecard
+sudo mv scorecard /usr/local/bin/scorecard
 
 # Linux
-wget https://github.com/ossf/scorecard/releases/latest/download/scorecard_linux_amd64
-chmod +x scorecard_linux_amd64
-sudo mv scorecard_linux_amd64 /usr/local/bin/scorecard
-```
-
-#### Option 2: Install with Go
-
-```bash
-# If you have Go 1.21+ installed
-go install github.com/ossf/scorecard/v4/cmd/scorecard@latest
-
-# Make sure $GOPATH/bin is in your PATH
-export PATH=$PATH:$(go env GOPATH)/bin
+curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_linux_amd64
+chmod +x scorecard
+sudo mv scorecard /usr/local/bin/scorecard
 ```
 
 Verify installation:
@@ -410,21 +400,20 @@ For detailed troubleshooting guides, see:
 
 ### Common Issues
 
-**1. Scorecard Installation Error**
+**1. Scorecard Command Not Found**
 
 ```bash
-go: module github.com/ossf/scorecard/v5@latest found (v5.3.0),
-but does not contain package github.com/ossf/scorecard/v5/cmd/scorecard
+Error: OpenSSF Scorecard not found
 ```
 
-**Solution**: Use the correct version (v4) or download the binary directly:
+**Solution**: Download the scorecard binary directly:
 
 ```bash
-# Correct Go command
-go install github.com/ossf/scorecard/v4/cmd/scorecard@latest
-
-# Or download binary (recommended)
-# See installation instructions above
+# See installation instructions above for your platform
+# Example for Linux:
+curl -L -o scorecard https://github.com/ossf/scorecard/releases/latest/download/scorecard_linux_amd64
+chmod +x scorecard
+sudo mv scorecard /usr/local/bin/scorecard
 ```
 
 **2. ActionsGuard Not Found on PyPI**
@@ -441,18 +430,7 @@ cd actions-guard
 pip install -e .
 ```
 
-**3. Scorecard Command Not Found**
-
-```bash
-Error: OpenSSF Scorecard not found
-```
-
-**Solution**:
-- Ensure Scorecard binary is in your PATH
-- For Go installation, add to PATH: `export PATH=$PATH:$(go env GOPATH)/bin`
-- Verify with: `which scorecard` and `scorecard version`
-
-**4. GitHub API Rate Limit**
+**3. GitHub API Rate Limit**
 
 ```bash
 Error: GitHub API rate limit exceeded
@@ -463,7 +441,7 @@ Error: GitHub API rate limit exceeded
 - Use a different token
 - Authenticated requests have higher limits (5000/hour vs 60/hour)
 
-**5. Organization Access Denied**
+**4. Organization Access Denied**
 
 ```bash
 Error: No permission to access organization
@@ -474,7 +452,7 @@ Error: No permission to access organization
 - For Classic tokens: Ensure your token has the `read:org` scope
 - Verify you're a member of the organization or have appropriate access
 
-**6. Python Project Not Found**
+**5. Python Project Not Found**
 
 ```bash
 ERROR: file:///path does not appear to be a Python project
