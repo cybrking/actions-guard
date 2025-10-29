@@ -71,9 +71,15 @@ scorecard version
 
 ### Install ActionsGuard
 
-#### Development Installation (Current Method)
+#### Via pip (Recommended)
 
-Since ActionsGuard is not yet published to PyPI, install from source:
+```bash
+pip install actionsguard
+```
+
+#### Development Installation
+
+For contributing or local development:
 
 ```bash
 # Clone the repository
@@ -84,20 +90,11 @@ cd actions-guard
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install dependencies
-pip install -r requirements.txt
-
-# Install ActionsGuard in development mode
+# Install in development mode
 pip install -e .
 
 # Verify installation
 actionsguard --version
-```
-
-#### Future: Via pip (After PyPI Publication)
-
-```bash
-pip install actionsguard
 ```
 
 ## Quick Start
@@ -431,21 +428,7 @@ scorecard version
 
 If you don't have Homebrew, install it from https://brew.sh or see the manual installation instructions in the Prerequisites section above.
 
-**2. ActionsGuard Not Found on PyPI**
-
-```bash
-ERROR: Could not find a version that satisfies the requirement actionsguard
-```
-
-**Solution**: ActionsGuard is not yet published to PyPI. Install from source:
-
-```bash
-git clone https://github.com/cybrking/actions-guard.git
-cd actions-guard
-pip install -e .
-```
-
-**3. GitHub API Rate Limit**
+**2. GitHub API Rate Limit**
 
 ```bash
 Error: GitHub API rate limit exceeded
@@ -456,7 +439,7 @@ Error: GitHub API rate limit exceeded
 - Use a different token
 - Authenticated requests have higher limits (5000/hour vs 60/hour)
 
-**4. Organization Access Denied**
+**3. Organization Access Denied**
 
 ```bash
 Error: No permission to access organization
@@ -467,7 +450,7 @@ Error: No permission to access organization
 - For Classic tokens: Ensure your token has the `read:org` scope
 - Verify you're a member of the organization or have appropriate access
 
-**5. Python Project Not Found**
+**4. Python Project Not Found**
 
 ```bash
 ERROR: file:///path does not appear to be a Python project
