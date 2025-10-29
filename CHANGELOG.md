@@ -5,6 +5,20 @@ All notable changes to ActionsGuard will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2025-01-15
+
+### Added
+- Automated PyPI publishing via GitHub Actions with Trusted Publishing
+- Comprehensive release process documentation (RELEASING.md)
+
+### Changed
+- Updated README to reflect PyPI availability as primary installation method
+- Improved documentation structure
+
+### Fixed
+- Updated repository URLs from placeholder to actual URLs
+- Added missing pyyaml dependency to package requirements
+
 ## [1.0.0] - 2024-10-24
 
 ### Added
