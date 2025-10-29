@@ -74,7 +74,7 @@ scorecard version
 #### Via pip (Recommended)
 
 ```bash
-pip install actionsguard
+pip3 install actionsguard
 ```
 
 #### Development Installation
@@ -87,11 +87,11 @@ git clone https://github.com/cybrking/actions-guard.git
 cd actions-guard
 
 # Create virtual environment (recommended)
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install in development mode
-pip install -e .
+pip3 install -e .
 
 # Verify installation
 actionsguard --version
@@ -338,11 +338,11 @@ git clone https://github.com/cybrking/actions-guard.git
 cd actions-guard
 
 # Create virtual environment
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install development dependencies
-pip install -e ".[dev]"
+pip3 install -e ".[dev]"
 ```
 
 ### Running Tests
@@ -371,7 +371,7 @@ mypy actionsguard/
 ```yaml
 - name: Security Scan
   run: |
-    pip install actionsguard
+    pip3 install actionsguard
     actionsguard scan --org ${{ github.repository_owner }} --fail-on-critical
 ```
 
@@ -380,7 +380,7 @@ mypy actionsguard/
 ```yaml
 security_scan:
   script:
-    - pip install actionsguard
+    - pip3 install actionsguard
     - actionsguard scan --org my-org --fail-on-critical
   artifacts:
     paths:
@@ -392,7 +392,7 @@ security_scan:
 ```groovy
 stage('Security Scan') {
     steps {
-        sh 'pip install actionsguard'
+        sh 'pip3 install actionsguard'
         sh 'actionsguard scan --org my-org --fail-on-critical'
         publishHTML([
             reportDir: 'reports',
@@ -460,7 +460,7 @@ ERROR: file:///path does not appear to be a Python project
 
 ```bash
 cd actions-guard  # Navigate to the cloned repository
-pip install -e .
+pip3 install -e .
 ```
 
 ## Contributing

@@ -93,7 +93,7 @@ source venv/bin/activate
 
 ```bash
 # Install ActionsGuard and dependencies
-pip install -e .
+pip3 install -e .
 
 # Verify installation
 actionsguard --version

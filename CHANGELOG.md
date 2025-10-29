@@ -5,6 +5,15 @@ All notable changes to ActionsGuard will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2025-01-29
+
+### Changed
+- Updated all documentation to use Python 3 commands (`python3` and `pip3`)
+- Updated README.md installation and development instructions
+- Updated CONTRIBUTING.md setup instructions
+- Updated QUICKSTART.md installation steps
+- Updated CI/CD integration examples for GitHub Actions, GitLab CI, and Jenkins
+
 ## [1.0.1] - 2025-01-15
 
 ### Added
