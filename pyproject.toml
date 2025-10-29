@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "actionsguard"
-version = "1.0.1"
+version = "1.0.2"
 description = "GitHub Actions security scanner using OpenSSF Scorecard"
 readme = "README.md"
 requires-python = ">=3.8"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
     {name = "Travis Felder", email = "travis@cybrking.com"}
 ]
