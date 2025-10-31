@@ -15,6 +15,7 @@
 - **⚡ Parallel Execution**: Fast scanning with concurrent repository processing
 - **🎯 Focused Checks**: Run specific security checks or all OpenSSF Scorecard checks
 - **📈 Beautiful Reports**: Visual HTML reports with risk scoring and detailed findings
+- **🤖 Auto-Merge Support**: Automated PR merging for continuous security monitoring
 
 ## What It Checks
 
